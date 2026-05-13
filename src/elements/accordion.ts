@@ -28,7 +28,7 @@ export default interface Accordion extends HighLevelElement<HTMLDivElement, Acco
     /**
      * Toggles the accordion between open and closed states.
      */
-    toggle(cause?: UIEvent): void;
+    toggle(): void;
 
     /**
      * Whether the accordion is currently open.
