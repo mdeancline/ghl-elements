@@ -20,7 +20,7 @@
         "moduleResolution": "bundler",
         "esModuleInterop": true,
         "allowSyntheticDefaultImports": true,
-        "isolatedModules": true,
+        "isolatedModules": false,
         "forceConsistentCasingInFileNames": true,
         "skipLibCheck": true,
         "declaration": true,
