@@ -10,7 +10,7 @@ export default class FAQAccordionImpl extends CustomAccordion {
         const childPanel = element.querySelector(FAQAccordionImpl.CHILD_PANEL_SELECTOR) as HTMLElement;
         const childParent = childPanel.parentElement as HTMLElement;
         const childIndex = Array.prototype.indexOf.call(childParent.children, childPanel);
-        childPanel.id = `${childParent.id}-child-${childIndex}`;
+        childPanel.id = `${childParent.id}-child-${childIndex + 1}`;
     }
 
     public override open(cause?: UIEvent): void {

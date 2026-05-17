@@ -34,7 +34,7 @@ export default class OrderFormImpl extends HighLevelElementImpl<HTMLDivElement, 
         const orderBumpElements = element.querySelectorAll<HTMLElement>(OrderFormImpl.ORDER_BUMP_SELECTOR);
 
         for (const orderBumpElement of orderBumpElements) {
-            const id = orderBumpElement.id ? orderBumpElement.id : `${element.id}-bump-${this.mappedOrderBumps.size}`;
+            const id = orderBumpElement.id ? orderBumpElement.id : `${element.id}-bump-${this.mappedOrderBumps.size + 1}`;
             this.mappedOrderBumps.set(id, new OrderBumpImpl(this, this.hldocument, orderBumpElement));
         }
     }

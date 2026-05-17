@@ -7,12 +7,13 @@ import HighLevelElement from "./high-level-element";
  * Provides access to order bumps, [Stripe Elements](https://docs.stripe.com/payments/elements), and coupon submission.
  * 
  * @example
- * const form = hldocument.getElementsByType(OrderForm)[0];
+ * const form = hldocument.getFirstElementByType(OrderForm);
  * form.submitCoupon('SAVE20');
  */
 export default abstract class OrderForm extends HighLevelElement<HTMLDivElement, OrderFormEventMap> {
     /**
      * Programmatically submits a coupon code to the order form.
+     * Fires the `beforecouponsubmit` and `aftercouponsubmit` events on this element and `hldocument`.
      * 
      * @param code - The coupon code to apply
      * @returns `true` if the coupon was submitted successfully, `false` if either the coupon
@@ -41,14 +42,23 @@ export default abstract class OrderForm extends HighLevelElement<HTMLDivElement,
     abstract getStripeElement<K extends keyof StripeElementTypeMap>(name: K): StripeElementTypeMap[K] | undefined;
 
     /**
-     * Resolves the Stripe Elements instance associated with this order form.
-     * Returns a Promise since Stripe JS may not be immediately available.
-     * 
+     * Returns a Promise that resolves to the {@link StripeElements} instance associated
+     * with this order form once Stripe JS has loaded and been initialized by HighLevel.
+     *
+     * If Stripe JS has already loaded by the time this is called, the Promise resolves
+     * on the next microtask tick. Use {@link getStripeElement} to synchronously access
+     * a specific mounted element once the Promise has resolved.
+     *
      * @returns A Promise that resolves to the {@link StripeElements} instance
-     * 
+     *
      * @example
      * const elements = await form.getStripeElements();
      * elements.update({ appearance });
+     *
+     * @example
+     * // Access a specific element after Stripe has loaded
+     * await form.getStripeElements();
+     * const paymentElement = form.getStripeElement('payment');
      */
     abstract getStripeElements(): Promise<StripeElements>;
 

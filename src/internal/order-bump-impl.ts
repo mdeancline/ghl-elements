@@ -70,8 +70,4 @@ export default class OrderBumpImpl extends HighLevelElementImpl<HTMLElement, Ord
     public get domElement(): HTMLElement {
         return this.element;
     }
-
-    public set badgeLabel(label: string) {
-        this.element.setAttribute('data-badge-label', label);
-    }
 }

@@ -3,7 +3,7 @@ import Utils from './utils/utils';
 import AccordionFactory from './accordion-factory';
 import CustomAccordion from './custom-accordion';
 import ElementCreationObserver from './dom/element-creation-observer';
-import FAQAccordionImpl from './faq-accordion';
+import FAQAccordionImpl from './faq-accordion-impl';
 import HighLevelElement from '../elements/high-level-element';
 import HighLevelElementFactory from './high-level-element-factory';
 import OrderFormFactory from './order-form-factory';

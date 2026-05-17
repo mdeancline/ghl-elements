@@ -3,30 +3,49 @@ import HighLevelElement from "./high-level-element";
 /**
  * Represents a HighLevel accordion element, custom or provided by HighLevel, with open/close toggle behavior.
  * 
- * **Note:** If the accordion is an FAQ child, the format for retrieving that specific child with this
- * library is as follows: <i>[FAQ element id]-child-[index]</i>
+ * Two accordion types are supported:
+ * - **Custom accordions:** elements with the `.accordion` class, registered automatically by `hldocument`
+ * - **FAQ accordions:** HighLevel FAQ child elements with the `.hl-faq-child` class, registered automatically by `hldocument`
+ * 
+ * **Retrieving a custom accordion:**
+ * Pass the element's DOM ID directly.
+ * 
+ * **Retrieving an FAQ child accordion:**
+ * FAQ children do not have IDs in HighLevel's DOM. This library assigns them
+ * automatically using the format: `{faqElementId}-child-{index}`, where `index` is one-based.
  * 
  * @example
+ * // Custom accordion
  * const accordion = hldocument.getElementById('my-custom-accordion', Accordion);
- * accordion.open();
+ * accordion?.open();
  * 
- * // for an FAQ child
- * const faqChild = hldocument.getElementById('faq-sR-MbONj3oUV-child-1', Accordion);
- * faqChild.open();
+ * @example
+ * // FAQ child accordion (second child, one-based index)
+ * const faqChild = hldocument.getElementById('faq-sR-MbONj3oUV-child-2', Accordion);
+ * faqChild?.open();
+ * 
+ * @example
+ * // All accordions
+ * const accordions = hldocument.getElementsByType(Accordion);
+ * accordions.forEach(a => a.close());
  */
 export default interface Accordion extends HighLevelElement<HTMLDivElement, AccordionEventMap> {
     /**
-     * Opens the accordion.
+     * Opens the accordion. Has no effect if the accordion is already open.
+     * Fires the `open` event on this element and `accordionopen` on `hldocument`.
      */
     open(): void;
 
     /**
      * Closes the accordion.
+     * Has no effect if the accordion is already closed.
+     * Fires the `close` event on this element and `accordionclose` on `hldocument`.
      */
     close(): void;
 
     /**
      * Toggles the accordion between open and closed states.
+     * Opens if currently closed, closes if currently open.
      */
     toggle(): void;
 
