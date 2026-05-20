@@ -8,7 +8,7 @@ A framework for building custom element behavior on [GoHighLevel](https://www.go
 npm install ghl-elements
 ```
 
-If you are using Stripe as a payment processor on your HighLevel page, install the peer dependency as well:
+If you are using Stripe as a payment integration on your HighLevel page, install the peer dependency as well:
 
 ```bash
 npm install @stripe/stripe-js
@@ -18,9 +18,9 @@ npm install @stripe/stripe-js
 
 ## Overview
 
-`ghl-elements` provides a structured way to interact with HighLevel's page elements programatically via custom JavaScript injected into your HighLevel pages. It automatically registers and manages elements like order forms, order bumps, and FAQ children, exposing a clean API to interact with them programmatically.
+`ghl-elements` provides a structured way to interact with HighLevel's page elements programmatically via custom JavaScript injected into your HighLevel pages. It automatically registers and manages elements like order forms, order bumps, and FAQ children, exposing a clean API to interact with them programmatically.
 
-The library is intended to be bundled and injected into your HighLevel pages via the Custom HTML/JavaScript element in HighLevel's page builder. It is not intended for use in a standard web application outside of a HighLevel page.
+The library is intended to be bundled and injected into your HighLevel pages via the **Custom HTML/JavaScript** element in HighLevel's page builder. It is not intended for use in a standard web application outside of a HighLevel page.
 
 The library exposes a single entry point, `hldocument`, which acts as the central registry for all managed elements on the page.
 
@@ -91,6 +91,18 @@ hldocument.addEventListener('aftercouponsubmit', event => {
     console.log('Coupon submitted:', event.detail.couponCode);
 });
 
+hldocument.addEventListener('couponsuccess', event => {
+    console.log('Coupon applied:', event.detail.couponCode);
+});
+
+hldocument.addEventListener('couponerror', event => {
+    console.log('Invalid coupon:', event.detail.couponCode);
+});
+
+hldocument.addEventListener('couponreset', event => {
+    console.log('Coupon reset:', event.detail.couponCode);
+});
+
 hldocument.addEventListener('orderbumpselect', event => {
     console.log('Order bump selected:', event.detail.orderBump);
 });
@@ -107,7 +119,10 @@ hldocument.addEventListener('orderbumpdeselect', event => {
 | `accordionopen` | Any accordion opens |
 | `accordionclose` | Any accordion closes |
 | `beforecouponsubmit` | A coupon is about to be submitted |
-| `aftercouponsubmit` | A coupon has been submitted |
+| `aftercouponsubmit` | A coupon has been submitted, regardless of outcome |
+| `couponsuccess` | A coupon is successfully applied |
+| `couponerror` | A coupon code is invalid |
+| `couponreset` | A coupon error state is cleared |
 | `orderbumpselect` | An order bump is selected |
 | `orderbumpdeselect` | An order bump is deselected |
 
@@ -148,23 +163,26 @@ Retrieves a mounted Stripe element by its type name. Returns `undefined` if Stri
 await form.getStripeElements();
 
 const paymentElement = form.getStripeElement('payment');
-const cardElement = form.getStripeElement('card');
 ```
 
 ##### `getStripeElements(): Promise<StripeElements>`
 
-Returns a Promise that resolves to the Stripe Elements instance once Stripe JS has loaded and been initialized by HighLevel.
+Returns a Promise that resolves to the Stripe Elements instance once Stripe JS has loaded and been initialized by HighLevel. The Promise is rejected with an error after 10 seconds if Stripe JS fails to load.
 
 ```typescript
-const elements = await form.getStripeElements();
-elements.update({ appearance });
+try {
+    const elements = await form.getStripeElements();
+    elements.update({ appearance });
+} catch (e) {
+    console.warn(e.message);
+}
 ```
 
 #### Properties
 
 | Property | Type | Description |
 |---|---|---|
-| `orderBumps` | `readonly OrderBump[]` | The order bumps within this form |
+| `orderBumps` | `Iterable<OrderBump>` | The order bumps within this form |
 
 #### Element Events
 
@@ -177,6 +195,18 @@ form.addEventListener('beforecouponsubmit', event => {
 
 form.addEventListener('aftercouponsubmit', event => {
     console.log('Coupon submitted:', event.detail.couponCode);
+});
+
+form.addEventListener('couponsuccess', event => {
+    console.log('Coupon applied:', event.detail.couponCode);
+});
+
+form.addEventListener('couponerror', event => {
+    console.log('Invalid coupon:', event.detail.couponCode);
+});
+
+form.addEventListener('couponreset', event => {
+    console.log('Coupon reset:', event.detail.couponCode);
 });
 ```
 
@@ -198,6 +228,7 @@ const bumps = hldocument.getElementsByType(OrderBump);
 
 // Select an order bump programmatically
 bumps[0]?.select();
+
 // Specific order bump by generated ID (one-based index)
 const bump = hldocument.getElementById('one-step-order-IjosAGseXl-bump-1', OrderBump);
 
@@ -294,6 +325,8 @@ accordion.addEventListener('open', () => {
     console.log('Accordion opened');
 });
 ```
+
+---
 
 ## License
 
