@@ -1,16 +1,16 @@
-import HighLevelElementImpl from "./high-level-element-impl";
+import MountingHighLevelElement from "./mounting-high-level-element";
 import OrderBump, { OrderBumpEventMap } from "../elements/order-bump";
 import OrderFormImpl from "./order-form-impl";
-import HighLevelDocumentImpl from "./high-level-document-impl";
 import { assert } from "ts-essentials";
+import MountingHighLevelDocument from "./mounting-high-level-document";
 
-export default class OrderBumpImpl extends HighLevelElementImpl<HTMLElement, OrderBumpEventMap> implements OrderBump {
+export default class OrderBumpImpl extends MountingHighLevelElement<HTMLElement, OrderBumpEventMap> implements OrderBump {
     private readonly headerElement: HTMLDivElement;
     private readonly otoHeadlineElement: HTMLSpanElement;
     private readonly descriptionElement: HTMLSpanElement;
     private readonly checkboxElement: HTMLInputElement;
 
-    public constructor(private readonly orderForm: OrderFormImpl, private readonly hldocument: HighLevelDocumentImpl, private readonly element: HTMLElement) {
+    public constructor(private readonly orderForm: OrderFormImpl, private readonly hldocument: MountingHighLevelDocument, private readonly element: HTMLElement) {
         super();
 
         const headerElement = element.querySelector('.bump-header') as HTMLDivElement;

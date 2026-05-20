@@ -1,6 +1,6 @@
 import HighLevelElement from "../elements/high-level-element";
 
-export default abstract class HighLevelElementImpl<T extends HTMLElement, M extends HTMLElementEventMap> implements HighLevelElement<T, M> {
+export default abstract class MountingHighLevelElement<T extends HTMLElement, M extends HTMLElementEventMap> implements HighLevelElement<T, M> {
     public abstract get domElement(): T;
 
     public dispatchEvent(event: Event): boolean {

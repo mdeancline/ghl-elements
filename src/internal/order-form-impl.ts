@@ -4,10 +4,11 @@ import OrderBump from '../elements/order-bump';
 import { StripeElements } from '@stripe/stripe-js';
 import OrderForm, { OrderFormEventMap, StripeElementTypeMap } from '../elements/order-form';
 import OrderBumpImpl from './order-bump-impl';
-import HighLevelElementImpl from './high-level-element-impl';
-import HighLevelDocumentImpl from './high-level-document-impl';
+import MountingHighLevelElement from './mounting-high-level-element';
+import StripeElementsHandle from './stripe/stripe-elements-handle';
+import MountingHighLevelDocument from './mounting-high-level-document';
 
-export default class OrderFormImpl extends HighLevelElementImpl<HTMLDivElement, OrderFormEventMap> implements OrderForm {
+export default class OrderFormImpl extends MountingHighLevelElement<HTMLDivElement, OrderFormEventMap> implements OrderForm {
     public static readonly SELECTOR: string = '.c-order';
 
     private static readonly ORDER_BUMP_SELECTOR: string = '.order-bump-container';
@@ -15,18 +16,7 @@ export default class OrderFormImpl extends HighLevelElementImpl<HTMLDivElement, 
     private static readonly COUPON_INPUT_SELECTOR: string = 'input[name="coupon_code"]';
     private static readonly COUPON_APPLIED_TEXT_SELECTOR: string = '.coupon-applied-text';
 
-    private static readonly PAYMENT_INTEGRATION_TIMEOUT: number = 10_000;
-    private static readonly PAYMENT_INTEGRATION_TIMEOUT_SECONDS: number = OrderFormImpl.PAYMENT_INTEGRATION_TIMEOUT / 1000;
-
-    private stripeElementsPromise: Promise<StripeElements> = new Promise((resolve, reject) => {
-        this.resolvePromisedStripeElements = resolve;
-        this.rejectPromisedStripeElements = reject;
-    });
-
-    private resolvePromisedStripeElements!: (elements: StripeElements) => void;
-    private rejectPromisedStripeElements!: (reason?: Error) => void;
-    private promisedStripeElements: StripeElements | null = null;
-
+    private readonly stripeHandle: StripeElementsHandle = new StripeElementsHandle();
     private couponBtn: HTMLButtonElement | null = null;
     private couponInputRef: WeakRef<HTMLInputElement> | null = null;
     private submittingCoupon: boolean = false;
@@ -35,7 +25,7 @@ export default class OrderFormImpl extends HighLevelElementImpl<HTMLDivElement, 
     private readonly updateObserver: ElementUpdateObserver<HTMLElement>;
     private readonly currentOrderBumps: Map<string, OrderBumpImpl> = new Map();
 
-    public constructor(private readonly hldocument: HighLevelDocumentImpl, private readonly element: HTMLDivElement) {
+    public constructor(private readonly hldocument: MountingHighLevelDocument, private readonly element: HTMLDivElement) {
         super();
         this.creationObserver = new ElementCreationObserver(element);
         this.updateObserver = new ElementUpdateObserver(element);
@@ -46,10 +36,6 @@ export default class OrderFormImpl extends HighLevelElementImpl<HTMLDivElement, 
             const id = orderBumpElement.id ? orderBumpElement.id : `${element.id}-bump-${this.currentOrderBumps.size + 1}`;
             this.currentOrderBumps.set(id, new OrderBumpImpl(this, this.hldocument, orderBumpElement));
         }
-
-        setTimeout(() => {
-            this.rejectPromisedStripeElements(new Error(`Stripe JS failed to load within ${OrderFormImpl.PAYMENT_INTEGRATION_TIMEOUT_SECONDS} seconds`));
-        }, OrderFormImpl.PAYMENT_INTEGRATION_TIMEOUT);
     }
 
     public mount(): void {
@@ -123,22 +109,12 @@ export default class OrderFormImpl extends HighLevelElementImpl<HTMLDivElement, 
         this.hldocument.dispatchEvent(event);
     }
 
-    public resolveNewStripeElements(elements: StripeElements): void {
-        this.promisedStripeElements = elements;
-        this.resolvePromisedStripeElements(elements);
-        this.stripeElementsPromise = Promise.resolve(elements);
+    public resolveStripeElements(elements: StripeElements): void {
+        this.stripeHandle.resolveElements(elements);
     }
 
     public invalidateStripeElements(): void {
-        this.promisedStripeElements = null;
-        this.stripeElementsPromise = new Promise((resolve, reject) => {
-            this.resolvePromisedStripeElements = resolve;
-            this.rejectPromisedStripeElements = reject;
-        });
-
-        setTimeout(() => {
-            this.rejectPromisedStripeElements(new Error(`Stripe elements failed to reinitialize within ${OrderFormImpl.PAYMENT_INTEGRATION_TIMEOUT_SECONDS} seconds`));
-        }, OrderFormImpl.PAYMENT_INTEGRATION_TIMEOUT);
+        this.stripeHandle.invalidate();
     }
 
     public get domElement(): HTMLDivElement {
@@ -154,12 +130,11 @@ export default class OrderFormImpl extends HighLevelElementImpl<HTMLDivElement, 
     }
 
     public getStripeElement<K extends keyof StripeElementTypeMap>(name: K): StripeElementTypeMap[K] | undefined {
-        if (this.promisedStripeElements === null) return undefined;
-        return (this.promisedStripeElements.getElement as (type: K) => StripeElementTypeMap[K] | null)(name) ?? undefined;
+        return this.stripeHandle.getElement(name);
     }
 
     public getStripeElements(): Promise<StripeElements> {
-        return this.stripeElementsPromise;
+        return this.stripeHandle.getElements();
     }
 
     public get orderBumps(): Iterable<OrderBump> {

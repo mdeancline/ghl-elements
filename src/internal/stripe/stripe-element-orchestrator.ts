@@ -63,7 +63,7 @@ export default class StripeElementOrchestrator {
         }
 
         this.watchForRemoval(mountingElement, orderForm);
-        orderForm.resolveNewStripeElements(stripeElements);
+        orderForm.resolveStripeElements(stripeElements);
     }
 
     private watchForRemoval(mountingElement: HTMLElement, orderForm: OrderFormImpl): void {

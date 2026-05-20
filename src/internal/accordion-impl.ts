@@ -1,7 +1,7 @@
 import Accordion, { AccordionEventMap } from "../elements/accordion";
-import HighLevelElementImpl from "./high-level-element-impl";
+import MountingHighLevelElement from "./mounting-high-level-element";
 
-export default abstract class AccordionImpl extends HighLevelElementImpl<HTMLDivElement, AccordionEventMap> implements Accordion {
+export default abstract class AccordionImpl extends MountingHighLevelElement<HTMLDivElement, AccordionEventMap> implements Accordion {
     protected constructor(protected readonly element: HTMLDivElement) {
         super();
         this.addEventListener('keydown', this.handleKeydown.bind(this));

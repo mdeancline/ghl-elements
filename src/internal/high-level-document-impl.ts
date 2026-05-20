@@ -7,11 +7,12 @@ import FAQAccordionImpl from './faq-accordion-impl';
 import HighLevelElement from '../elements/high-level-element';
 import HighLevelElementFactory from './high-level-element-factory';
 import OrderFormFactory from './order-form-factory';
-import HighLevelElementImpl from './high-level-element-impl';
+import MountingHighLevelElement from './mounting-high-level-element';
 import HighLevelDocument, { HighLevelDocumentEventMap } from '../elements/high-level-document';
 import StripeElementOrchestrator from './stripe/stripe-element-orchestrator';
+import MountingHighLevelDocument from './mounting-high-level-document';
 
-export default class HighLevelDocumentImpl implements HighLevelDocument {
+export default class HighLevelDocumentImpl implements MountingHighLevelDocument {
     private static readonly INSTANCE: HighLevelDocumentImpl = new HighLevelDocumentImpl();
 
     private readonly elements: IterableWeakMap<HTMLElement, HighLevelElement<HTMLElement, HTMLElementEventMap>> = new IterableWeakMap;
@@ -58,7 +59,7 @@ export default class HighLevelDocumentImpl implements HighLevelDocument {
         document.removeEventListener(type, listener as EventListener, options);
     }
 
-    public register<E extends HTMLElement, M extends HTMLElementEventMap, T extends HighLevelElementImpl<E, M>>(factory: HighLevelElementFactory<E, M, T>): void {
+    public register<E extends HTMLElement, M extends HTMLElementEventMap, T extends MountingHighLevelElement<E, M>>(factory: HighLevelElementFactory<E, M, T>): void {
         const htmlElements = document.querySelectorAll<E>(factory.selector);
 
         for (const htmlElement of htmlElements) {
@@ -68,7 +69,7 @@ export default class HighLevelDocumentImpl implements HighLevelDocument {
         this.creationObserver.watchSelector(factory.selector, htmlElement => this.mount(factory.create(htmlElement as E)));
     }
 
-    public mount<E extends HTMLElement, M extends HTMLElementEventMap, T extends HighLevelElementImpl<E, M>>(element: T): void {
+    public mount<E extends HTMLElement, M extends HTMLElementEventMap, T extends MountingHighLevelElement<E, M>>(element: T): void {
         element.mount();
         this.elements.set(element.domElement, element);
     }
