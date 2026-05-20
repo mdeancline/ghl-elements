@@ -1,5 +1,5 @@
 {
-    "name": "ghl-elements",
+    "name": "@mdeancline/ghl-elements",
     "version": "1.0.0",
     "description": "A framework for building custom element behavior on GoHighLevel pages",
     "type": "module",
@@ -23,9 +23,13 @@
         "elements",
         "stripe"
     ],
+    "homepage": "https://github.com/mdeancline/ghl-elements#readme",
+    "bugs": {
+        "url": "https://github.com/mdeancline/ghl-elements/issues"
+    },
     "repository": {
         "type": "git",
-        "url": "https://github.com/mdeancline/ghl-elements"
+        "url": "git+https://github.com/mdeancline/ghl-elements.git"
     },
     "scripts": {
         "clean": "node clean.mjs",
@@ -53,7 +57,6 @@
         "@stripe/stripe-js": "^9.3.1",
         "chalk": "^5.6.2",
         "esbuild": "^0.28.0",
-        "typescript": "^5.7.2",
-        "weakref": "^0.2.4"
+        "typescript": "^5.7.2"
     }
 }
