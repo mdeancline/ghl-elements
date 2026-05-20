@@ -15,12 +15,12 @@ export default class HighLevelDocumentImpl implements HighLevelDocument {
     private static readonly INSTANCE: HighLevelDocumentImpl = new HighLevelDocumentImpl();
 
     private readonly elements: IterableWeakMap<HTMLElement, HighLevelElement<HTMLElement, HTMLElementEventMap>> = new IterableWeakMap;
-    private readonly observer: ElementCreationObserver<HTMLElement> = new ElementCreationObserver;
+    private readonly creationObserver: ElementCreationObserver<HTMLElement> = new ElementCreationObserver;
     private readonly stripeOrchestrator: StripeElementOrchestrator = new StripeElementOrchestrator(this);
 
     private constructor() {
         Utils.callWhenLoaded(() => {
-            this.observer.start();
+            this.creationObserver.start();
             this.registerDefaults();
             this.stripeOrchestrator.start();
         });
@@ -65,7 +65,7 @@ export default class HighLevelDocumentImpl implements HighLevelDocument {
             this.mount(factory.create(htmlElement));
         }
 
-        this.observer.watchSelector(factory.selector, htmlElement => this.mount(factory.create(htmlElement as E)));
+        this.creationObserver.watchSelector(factory.selector, htmlElement => this.mount(factory.create(htmlElement as E)));
     }
 
     public mount<E extends HTMLElement, M extends HTMLElementEventMap, T extends HighLevelElementImpl<E, M>>(element: T): void {

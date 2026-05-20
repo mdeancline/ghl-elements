@@ -66,8 +66,14 @@ export interface HighLevelDocumentEventMap extends DocumentEventMap {
     'accordionclose': CustomEvent;
     /** Fired before a coupon code is submitted. */
     'beforecouponsubmit': CustomEvent;
-    /** Fired after a coupon code is submitted. */
+    /** Fired after a coupon code is submitted, regardless of outcome. */
     'aftercouponsubmit': CustomEvent;
+    /** Fired when a coupon code is successfully applied. */
+    'couponsuccess': CustomEvent;
+    /** Fired when a coupon code is invalid. */
+    'couponerror': CustomEvent;
+    /** Fired when a coupon code is reset. */
+    'couponreset': CustomEvent;
     /** Fired when an order bump is selected. */
     'orderbumpselect': CustomEvent;
     /** Fired when an order bump is deselected. */

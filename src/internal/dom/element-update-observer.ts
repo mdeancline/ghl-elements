@@ -22,11 +22,13 @@ export interface WatcherData<E extends Element> {
 export type UpdateCallback<E extends Element> = (element: E, info: ElementUpdateInfo) => void;
 
 export default class ElementUpdateObserver<E extends Element> {
-    private mutationObserver: MutationObserver = this.createObserver();
-    private watchers: Map<string, Set<WatcherData<E>>> = new Map();
+    private readonly mutationObserver: MutationObserver = this.createObserver();
+    private readonly elementSelectorCache: WeakMap<Element, Set<string>> = new WeakMap();
+    private readonly attributeWatcherIndex: Map<string, Set<string>> = new Map();
+    private readonly currentWatchers: Map<string, Set<WatcherData<E>>> = new Map();
     private root: Element;
     private observing: boolean = false;
-    private options: MutationObserverInit = {
+    private readonly options: MutationObserverInit = {
         attributes: true,
         attributeOldValue: true,
         characterData: true,
@@ -37,7 +39,6 @@ export default class ElementUpdateObserver<E extends Element> {
     public constructor(root: Element = document.body, options: MutationObserverInit = {}) {
         this.root = root;
         this.options = { ...this.options, ...options };
-        this.mutationObserver.observe(this.root, this.options);
     }
 
     public watchSelector(selector: string, callback: UpdateCallback<E>, options: WatchOptions = {}): void {
@@ -50,24 +51,28 @@ export default class ElementUpdateObserver<E extends Element> {
             ...options
         };
 
-        if (!this.watchers.has(selector)) {
-            this.watchers.set(selector, new Set());
+        if (!this.currentWatchers.has(selector)) {
+            this.currentWatchers.set(selector, new Set());
         }
 
-        const watcherData: WatcherData<E> = { callback, options: watchOptions };
-        this.watchers.get(selector)!.add(watcherData);
+        this.currentWatchers.get(selector)!.add({ callback, options: watchOptions });
 
-        if (!this.mutationObserver) {
-            this.createObserver();
-            this.start();
+        if (watchOptions.attributeFilter) {
+            for (const attr of watchOptions.attributeFilter) {
+                if (!this.attributeWatcherIndex.has(attr)) {
+                    this.attributeWatcherIndex.set(attr, new Set());
+                }
+
+                this.attributeWatcherIndex.get(attr)!.add(selector);
+            }
         }
     }
 
     public unwatchSelector(selector: string, callback: UpdateCallback<E> | null = null): void {
-        if (!this.watchers.has(selector)) return;
+        if (!this.currentWatchers.has(selector)) return;
 
         if (callback) {
-            const watchers: Set<WatcherData<E>> = this.watchers.get(selector)!;
+            const watchers = this.currentWatchers.get(selector)!;
 
             for (const watcher of watchers) {
                 if (watcher.callback === callback) {
@@ -77,20 +82,21 @@ export default class ElementUpdateObserver<E extends Element> {
             }
 
             if (watchers.size === 0) {
-                this.watchers.delete(selector);
+                this.currentWatchers.delete(selector);
             }
         } else {
-            this.watchers.delete(selector);
+            this.currentWatchers.delete(selector);
         }
 
-        if (this.watchers.size === 0) {
-            this.disconnect();
+        if (this.currentWatchers.size === 0) {
+            this.stop();
         }
     }
 
     public unwatchAll(): void {
-        this.watchers.clear();
-        this.disconnect();
+        this.currentWatchers.clear();
+        this.attributeWatcherIndex.clear();
+        this.stop();
     }
 
     public start(): void {
@@ -100,7 +106,7 @@ export default class ElementUpdateObserver<E extends Element> {
         }
     }
 
-    public disconnect(): void {
+    public stop(): void {
         if (this.observing) {
             this.mutationObserver.disconnect();
             this.observing = false;
@@ -108,11 +114,11 @@ export default class ElementUpdateObserver<E extends Element> {
     }
 
     public isWatching(selector: string): boolean {
-        return this.watchers.has(selector);
+        return this.currentWatchers.has(selector);
     }
 
-    public getWatchers(): string[] {
-        return Array.from(this.watchers.keys());
+    public get watchers(): Iterable<[string, Set<WatcherData<E>>]> {
+        return this.currentWatchers.entries();
     }
 
     private createObserver(): MutationObserver {
@@ -124,40 +130,71 @@ export default class ElementUpdateObserver<E extends Element> {
     }
 
     private processMutation(mutation: MutationRecord): void {
-        const target: Node = mutation.target;
+        const target = mutation.target;
         const element: Element | null = target.nodeType === 1 ? target as Element : target.parentElement;
 
         if (!element) return;
 
-        for (const [selector, watchers] of this.watchers) {
-            try {
-                if (!element.matches(selector)) continue;
+        const matchingSelectors = this.resolveMatchingSelectors(element, mutation);
+        if (matchingSelectors.size === 0) return;
 
-                for (const { callback, options } of watchers) {
-                    if (!this.shouldTrigger(mutation, options)) continue;
+        const updateInfo = this.buildUpdateInfo(mutation);
 
-                    const updateInfo: ElementUpdateInfo = this.buildUpdateInfo(mutation);
+        for (const selector of matchingSelectors) {
+            const watchers = this.currentWatchers.get(selector);
+            if (!watchers) continue;
 
-                    try {
-                        callback(element as E, updateInfo);
-                    } catch (error) {
-                        console.error(`Error in callback for selector "${selector}":`, error);
-                    }
+            for (const { callback, options } of watchers) {
+                if (!this.shouldTrigger(mutation, options)) continue;
+
+                try {
+                    callback(element as E, updateInfo);
+                } catch (error) {
+                    console.error(`Error in callback for selector "${selector}":`, error);
                 }
-            } catch (error) {
-                console.error(`Invalid selector "${selector}":`, error);
             }
         }
+    }
+
+    private resolveMatchingSelectors(element: Element, mutation: MutationRecord): Set<string> {
+        if (!this.elementSelectorCache.has(element)) {
+            const matched = new Set<string>();
+
+            for (const selector of this.currentWatchers.keys()) {
+                try {
+                    if (element.matches(selector)) matched.add(selector);
+                } catch {
+                    console.error(`Invalid selector "${selector}"`);
+                }
+            }
+
+            this.elementSelectorCache.set(element, matched);
+        }
+
+        const cached = this.elementSelectorCache.get(element)!;
+
+        if (mutation.type === 'attributes' && mutation.attributeName) {
+            const indexedSelectors = this.attributeWatcherIndex.get(mutation.attributeName);
+            if (indexedSelectors) {
+                return new Set([...cached].filter(s => indexedSelectors.has(s) || !this.hasAttributeFilter(s)));
+            }
+        }
+
+        return cached;
+    }
+
+    private hasAttributeFilter(selector: string): boolean {
+        const watchers = this.currentWatchers.get(selector);
+        if (!watchers) return false;
+        return [...watchers].some(w => w.options.attributeFilter !== null);
     }
 
     private shouldTrigger(mutation: MutationRecord, options: Required<WatchOptions>): boolean {
         if (mutation.type === 'attributes') {
             if (!options.attributes) return false;
-
             if (options.attributeFilter && options.attributeFilter.length > 0) {
                 return options.attributeFilter.includes(mutation.attributeName!);
             }
-
             return true;
         }
 
@@ -178,9 +215,7 @@ export default class ElementUpdateObserver<E extends Element> {
             info.attributeName = mutation.attributeName!;
             info.oldValue = mutation.oldValue;
             info.newValue = (mutation.target as Element).getAttribute(mutation.attributeName!);
-        }
-
-        if (mutation.type === 'characterData') {
+        } else if (mutation.type === 'characterData') {
             info.oldValue = mutation.oldValue;
             info.newValue = mutation.target.textContent;
         }

@@ -1,10 +1,10 @@
 import { assert } from "ts-essentials";
 
-export type CreationCallback<E extends Element> = (element: E) => void;
+export type CreationWatcher<E extends Element> = (element: E) => void;
 
 export default class ElementCreationObserver<E extends Element> {
     private readonly mutationObserver: MutationObserver = this.createMutationObserver();
-    private readonly currentWatchers: Map<string, Set<CreationCallback<E>>> = new Map();
+    private readonly currentWatchers: Map<string, Set<CreationWatcher<E>>> = new Map();
     private readonly root: Element;
     private readonly options: MutationObserverInit = {
         childList: true,
@@ -17,7 +17,7 @@ export default class ElementCreationObserver<E extends Element> {
         this.options = { ...this.options, ...options };
     }
 
-    public watchSelector(selector: string, callback: CreationCallback<E>): void {
+    public watchSelector(selector: string, callback: CreationWatcher<E>): void {
         assert(this.observing, `${this.constructor.name} is not currently observing`);
 
         if (!this.currentWatchers.has(selector)) {
@@ -27,15 +27,15 @@ export default class ElementCreationObserver<E extends Element> {
         this.currentWatchers.get(selector)!.add(callback);
     }
 
-    public watchAll(callback: CreationCallback<E>): void {
+    public watchAll(callback: CreationWatcher<E>): void {
         this.watchSelector('*', callback);
     }
 
-    public unwatchSelector(selector: string, callback: CreationCallback<E> | null = null): void {
+    public unwatchSelector(selector: string, callback: CreationWatcher<E> | null = null): void {
         if (!this.currentWatchers.has(selector)) return;
 
         if (callback) {
-            const callbacks: Set<CreationCallback<E>> = this.currentWatchers.get(selector)!;
+            const callbacks = this.currentWatchers.get(selector)!;
             callbacks.delete(callback);
 
             if (callbacks.size === 0) {
@@ -46,13 +46,13 @@ export default class ElementCreationObserver<E extends Element> {
         }
 
         if (this.currentWatchers.size === 0) {
-            this.disconnect();
+            this.stop();
         }
     }
 
     public unwatchAll(): void {
         this.currentWatchers.clear();
-        this.disconnect();
+        this.stop();
     }
 
     public start(): void {
@@ -62,7 +62,7 @@ export default class ElementCreationObserver<E extends Element> {
         }
     }
 
-    public disconnect(): void {
+    public stop(): void {
         if (this.observing) {
             this.mutationObserver.disconnect();
             this.observing = false;
@@ -77,8 +77,8 @@ export default class ElementCreationObserver<E extends Element> {
         return this.currentWatchers.has(selector);
     }
 
-    public get watchers(): string[] {
-        return Array.from(this.currentWatchers.keys());
+    public get watchers(): Iterable<[string, Set<CreationWatcher<E>>]> {
+        return this.currentWatchers.entries();
     }
 
     private createMutationObserver(): MutationObserver {
@@ -99,21 +99,19 @@ export default class ElementCreationObserver<E extends Element> {
     }
 
     private checkElement(element: E, processedElements: WeakSet<Element>): void {
-        if (processedElements.has(element)) {
-            return;
-        }
+        if (processedElements.has(element)) return;
 
         for (const [selector, callbacks] of this.currentWatchers) {
             try {
-                if (element.matches(selector)) {
-                    processedElements.add(element);
+                if (!element.matches(selector)) continue;
 
-                    for (const callback of callbacks) {
-                        try {
-                            callback(element);
-                        } catch (error) {
-                            console.error(`Error in callback for selector "${selector}":`, error);
-                        }
+                processedElements.add(element);
+
+                for (const callback of callbacks) {
+                    try {
+                        callback(element);
+                    } catch (error) {
+                        console.error(`Error in callback for selector "${selector}":`, error);
                     }
                 }
             } catch (error) {
@@ -125,12 +123,10 @@ export default class ElementCreationObserver<E extends Element> {
     private checkChildren(parent: Element, processedElements: WeakSet<Element>): void {
         for (const [selector, callbacks] of this.currentWatchers) {
             try {
-                const matchingChildren: NodeListOf<E> = parent.querySelectorAll(selector);
+                const matchingChildren = parent.querySelectorAll<E>(selector);
 
                 for (const child of matchingChildren) {
-                    if (processedElements.has(child)) {
-                        continue;
-                    }
+                    if (processedElements.has(child)) continue;
 
                     processedElements.add(child);
 

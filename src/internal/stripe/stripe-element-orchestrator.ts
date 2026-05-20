@@ -1,4 +1,3 @@
-// stripe-element-orchestrator.ts
 import { Stripe, StripeElement, StripeElements } from '@stripe/stripe-js';
 import StripeInterceptor from './stripe-interceptor';
 import Proxies from '../utils/proxies';
@@ -36,9 +35,20 @@ export default class StripeElementOrchestrator {
     }
 
     private onStripeElementMounted(stripeElements: StripeElements, selector: string): void {
+        if (!selector.startsWith('#')) {
+            console.warn(`Unexpected Stripe mount selector format: "${selector}"`);
+            return;
+        }
+
         const id = selector.slice(1);
         const mountingElement = document.getElementById(id);
-        const orderFormElement = mountingElement?.closest(OrderFormImpl.SELECTOR) as HTMLElement | null;
+
+        if (!mountingElement) {
+            console.warn(`Could not find Stripe mount element for selector "${selector}"`);
+            return;
+        }
+
+        const orderFormElement = mountingElement.closest<HTMLElement>(OrderFormImpl.SELECTOR);
 
         if (!orderFormElement) {
             console.warn(`Could not find order form for selector "${selector}"`);
@@ -52,6 +62,20 @@ export default class StripeElementOrchestrator {
             return;
         }
 
-        orderForm.resolveStripeElements(stripeElements);
+        this.watchForRemoval(mountingElement, orderForm);
+        orderForm.resolveNewStripeElements(stripeElements);
+    }
+
+    private watchForRemoval(mountingElement: HTMLElement, orderForm: OrderFormImpl): void {
+        const observer = new MutationObserver(() => {
+            if (document.contains(mountingElement)) return;
+            orderForm.invalidateStripeElements();
+            observer.disconnect();
+        });
+
+        observer.observe(mountingElement.parentElement ?? orderForm.domElement, {
+            childList: true,
+            subtree: true,
+        });
     }
 }
