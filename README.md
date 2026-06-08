@@ -5,7 +5,7 @@ A framework for building custom element behavior on [GoHighLevel](https://www.go
 ## Installation
 
 ```bash
-npm install ghl-elements
+npm install @mdcline/ghl-elements
 ```
 
 If you are using Stripe as a payment integration on your HighLevel page, install the peer dependency as well:
