@@ -1,9 +1,9 @@
-import type { Stripe } from '@stripe/stripe-js';
-import ScriptWatcher from '../utils/script-watcher';
+import { Stripe } from '@stripe/stripe-js';
+import { ScriptWatcher } from '../utils/script-watcher';
 
 export type StripeInstanceCallback = (stripe: Stripe) => Stripe;
 
-export default class StripeInterceptor implements ScriptWatcher {
+export class StripeInterceptor implements ScriptWatcher {
     private static readonly BASE_SRC: string = 'https://js.stripe.com';
     private static readonly API_ENTRY_FUNC_NAME = 'Stripe';
     private static readonly API_VERSION = 'v3';

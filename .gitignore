@@ -19,7 +19,6 @@ npm-debug.log*
 Thumbs.db
 
 # Editor
-.vscode/
 .idea/
 *.suo
 *.ntvs*
@@ -33,3 +32,6 @@ Thumbs.db
 # NPM
 *.tgz
 .npmrc
+
+# API Extractor
+temp/

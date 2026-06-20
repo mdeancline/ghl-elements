@@ -2,7 +2,7 @@ import { assert } from "ts-essentials";
 
 export type CreationWatcher<E extends Element> = (element: E) => void;
 
-export default class ElementCreationObserver<E extends Element> {
+export class ElementCreationObserver<E extends Element> {
     private readonly mutationObserver: MutationObserver = this.createMutationObserver();
     private readonly currentWatchers: Map<string, Set<CreationWatcher<E>>> = new Map();
     private readonly root: Element;
@@ -17,17 +17,17 @@ export default class ElementCreationObserver<E extends Element> {
         this.options = { ...this.options, ...options };
     }
 
-    public watchSelector(selector: string, callback: CreationWatcher<E>): void {
+    public watchSelector<EE extends E>(selector: string, callback: CreationWatcher<EE>): void {
         assert(this.observing, `${this.constructor.name} is not currently observing`);
 
         if (!this.currentWatchers.has(selector)) {
             this.currentWatchers.set(selector, new Set());
         }
 
-        this.currentWatchers.get(selector)!.add(callback);
+        this.currentWatchers.get(selector)!.add(callback as CreationWatcher<E>);
     }
 
-    public watchAll(callback: CreationWatcher<E>): void {
+    public watchAll<EE extends E>(callback: CreationWatcher<EE>): void {
         this.watchSelector('*', callback);
     }
 

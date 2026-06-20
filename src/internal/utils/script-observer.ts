@@ -1,8 +1,8 @@
 import { assert } from 'ts-essentials';
-import ElementCreationObserver from '../dom/element-creation-observer';
-import ScriptWatcher from './script-watcher';
+import { ElementCreationObserver } from '../dom/element-creation-observer';
+import { ScriptWatcher } from './script-watcher';
 
-export default class ScriptObserver {
+export class ScriptObserver {
     private readonly watchers: ScriptWatcher[] = [];
 
     public constructor(

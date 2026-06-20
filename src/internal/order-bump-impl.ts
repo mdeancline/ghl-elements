@@ -1,47 +1,24 @@
-import MountingHighLevelElement from "./mounting-high-level-element";
-import OrderBump, { OrderBumpEventMap } from "../elements/order-bump";
-import OrderFormImpl from "./order-form-impl";
+import { Mountable } from "./mountable";
+import { OrderBump, OrderBumpEventMap, OrderBumpSelectionDetails } from "../api/order-bump";
 import { assert } from "ts-essentials";
-import MountingHighLevelDocument from "./mounting-high-level-document";
+import { OrderForm } from "../api/order-form";
 
-export default class OrderBumpImpl extends MountingHighLevelElement<HTMLElement, OrderBumpEventMap> implements OrderBump {
-    private readonly headerElement: HTMLDivElement;
-    private readonly otoHeadlineElement: HTMLSpanElement;
-    private readonly descriptionElement: HTMLSpanElement;
+export class OrderBumpImpl extends OrderBump implements Mountable {
     private readonly checkboxElement: HTMLInputElement;
 
-    public constructor(private readonly orderForm: OrderFormImpl, private readonly hldocument: MountingHighLevelDocument, private readonly element: HTMLElement) {
+    public constructor(private readonly orderForm: OrderForm, private readonly element: HTMLElement) {
         super();
-
-        const headerElement = element.querySelector('.bump-header') as HTMLDivElement;
-        assert(headerElement !== null, '.bump-header not found');
-        this.headerElement = headerElement;
-
-        const otoHeadlineElement = headerElement.querySelector('.bump-headline') as HTMLSpanElement;
-        assert(otoHeadlineElement !== null, '.bump-headline not found');
-        this.otoHeadlineElement = otoHeadlineElement;
-
-        const descriptionElement = element.querySelector('.oto-headline + span') as HTMLSpanElement;
-        assert(descriptionElement !== null, '.oto-headline + span not found');
-        this.descriptionElement = descriptionElement;
-
         const checkboxElement = element.querySelector('input[type="checkbox"]') as HTMLInputElement;
         assert(checkboxElement !== null, 'input[type="checkbox"] not found');
         this.checkboxElement = checkboxElement;
     }
 
-    public override mount(): void {
+    public mount(): void {
         this.checkboxElement.addEventListener('change', () => {
-            const eventType = this.checkboxElement.checked ? 'select' : 'deselect';
-            const eventInit = {
-                detail: {
-                    orderBump: this,
-                    orderForm: this.orderForm,
-                }
-            };
-
-            this.dispatchEvent(new CustomEvent(eventType, eventInit));
-            this.hldocument.dispatchEvent(new CustomEvent(`orderbump${eventType}`, eventInit));
+            const eventType: keyof OrderBumpEventMap = this.checkboxElement.checked ? 'select' : 'deselect';
+            const details: OrderBumpSelectionDetails = { orderForm: this.orderForm };
+            const event = new CustomEvent(eventType, { detail: details });
+            this.dispatchEvent(event);
         });
     }
 
@@ -55,16 +32,8 @@ export default class OrderBumpImpl extends MountingHighLevelElement<HTMLElement,
         this.checkboxElement.dispatchEvent(new Event('change'));
     }
 
-    public get header(): HTMLDivElement {
-        return this.headerElement;
-    }
-
-    public get headline(): HTMLSpanElement {
-        return this.otoHeadlineElement;
-    }
-
-    public get description(): HTMLSpanElement {
-        return this.descriptionElement;
+    public isSelected(): boolean {
+        return this.checkboxElement.checked;
     }
 
     public get domElement(): HTMLElement {

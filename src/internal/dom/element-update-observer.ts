@@ -1,16 +1,19 @@
 import { assert } from "ts-essentials";
 
 export interface ElementUpdateInfo {
-    type: 'attributes' | 'characterData';
+    type: 'attributes' | 'characterData' | 'childList';
     target: Node;
     attributeName?: string;
     oldValue?: string | null;
     newValue?: string | null;
+    addedNodes?: NodeList;
+    removedNodes?: NodeList;
 }
 
 export interface WatchOptions {
     attributes?: boolean;
     characterData?: boolean;
+    childList?: boolean;
     attributeFilter?: string[] | null;
 }
 
@@ -21,7 +24,7 @@ export interface WatcherData<E extends Element> {
 
 export type UpdateCallback<E extends Element> = (element: E, info: ElementUpdateInfo) => void;
 
-export default class ElementUpdateObserver<E extends Element> {
+export class ElementUpdateObserver<E extends Element> {
     private readonly mutationObserver: MutationObserver = this.createObserver();
     private readonly elementSelectorCache: WeakMap<Element, Set<string>> = new WeakMap();
     private readonly attributeWatcherIndex: Map<string, Set<string>> = new Map();
@@ -33,6 +36,7 @@ export default class ElementUpdateObserver<E extends Element> {
         attributeOldValue: true,
         characterData: true,
         characterDataOldValue: true,
+        childList: true,
         subtree: true
     };
 
@@ -41,12 +45,13 @@ export default class ElementUpdateObserver<E extends Element> {
         this.options = { ...this.options, ...options };
     }
 
-    public watchSelector(selector: string, callback: UpdateCallback<E>, options: WatchOptions = {}): void {
+    public watchSelector<EE extends E>(selector: string, callback: UpdateCallback<EE>, options: WatchOptions = {}): void {
         assert(this.observing, `${this.constructor.name} is not currently observing`);
 
         const watchOptions: Required<WatchOptions> = {
             attributes: true,
             characterData: true,
+            childList: true,
             attributeFilter: null,
             ...options
         };
@@ -55,7 +60,7 @@ export default class ElementUpdateObserver<E extends Element> {
             this.currentWatchers.set(selector, new Set());
         }
 
-        this.currentWatchers.get(selector)!.add({ callback, options: watchOptions });
+        this.currentWatchers.get(selector)!.add({ callback, options: watchOptions } as WatcherData<E>);
 
         if (watchOptions.attributeFilter) {
             for (const attr of watchOptions.attributeFilter) {
@@ -131,8 +136,34 @@ export default class ElementUpdateObserver<E extends Element> {
 
     private processMutation(mutation: MutationRecord): void {
         const target = mutation.target;
-        const element: Element | null = target.nodeType === 1 ? target as Element : target.parentElement;
 
+        if (mutation.type === 'childList') {
+            for (const node of [...mutation.addedNodes, ...mutation.removedNodes]) {
+                if (node.nodeType !== 1) continue;
+                const element = node as Element;
+                const matchingSelectors = this.resolveMatchingSelectors(element, mutation);
+                if (matchingSelectors.size === 0) continue;
+
+                const updateInfo = this.buildUpdateInfo(mutation);
+
+                for (const selector of matchingSelectors) {
+                    const watchers = this.currentWatchers.get(selector);
+                    if (!watchers) continue;
+
+                    for (const { callback, options } of watchers) {
+                        if (!options.childList) continue;
+                        try {
+                            callback(element as E, updateInfo);
+                        } catch (error) {
+                            console.error(`Error in callback for selector "${selector}":`, error);
+                        }
+                    }
+                }
+            }
+            return;
+        }
+
+        const element: Element | null = target.nodeType === 1 ? target as Element : target.parentElement;
         if (!element) return;
 
         const matchingSelectors = this.resolveMatchingSelectors(element, mutation);
@@ -207,7 +238,7 @@ export default class ElementUpdateObserver<E extends Element> {
 
     private buildUpdateInfo(mutation: MutationRecord): ElementUpdateInfo {
         const info: ElementUpdateInfo = {
-            type: mutation.type as 'attributes' | 'characterData',
+            type: mutation.type as 'attributes' | 'characterData' | 'childList',
             target: mutation.target
         };
 
@@ -218,6 +249,9 @@ export default class ElementUpdateObserver<E extends Element> {
         } else if (mutation.type === 'characterData') {
             info.oldValue = mutation.oldValue;
             info.newValue = mutation.target.textContent;
+        } else if (mutation.type === 'childList') {
+            info.addedNodes = mutation.addedNodes;
+            info.removedNodes = mutation.removedNodes;
         }
 
         return info;

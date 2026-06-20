@@ -24,6 +24,7 @@ if (!compilerOptions.target) {
 }
 
 const buildTarget = compilerOptions.target.toLowerCase();
+
 const libs = compilerOptions.lib || [];
 const buildPlatform = libs.some(lib => lib.toLowerCase().includes('dom')) ? 'browser' : 'node';
 
@@ -68,6 +69,13 @@ await esbuild.build({
 console.log('Generating type declarations...');
 try {
     execSync('npx tsc --project tsconfig.json', { stdio: 'inherit' });
+} catch {
+    process.exit(1);
+}
+
+console.log('Rolling up public API surface...');
+try {
+    execSync('npx api-extractor run --local --verbose', { stdio: 'inherit' });
 } catch {
     process.exit(1);
 }
