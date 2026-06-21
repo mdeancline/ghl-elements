@@ -11,7 +11,7 @@ npm install @mdcline/ghl-elements
 If you are using Stripe as a payment integration on your HighLevel page, install the peer dependency as well:
 
 ```bash
-npm install @stripe/stripe-js
+npm install @stripe/stripe-js@^9.2.0
 ```
 
 ---
@@ -165,16 +165,28 @@ if (!form.hasCouponApplied()) {
 }
 ```
 
-##### `getStripeElement<K>(name: K): StripeElementTypeMap[K] | null`
+##### `getStripeElement<K>(name: K): StripeElement | null`
 
 Retrieves a mounted Stripe element by its type name. Returns immediately without waiting for Stripe to load. Use `hasStripeAvailable()` to check whether Stripe is ready before calling this, or use `getStripeElements()` to wait for Stripe to load first.
 
 Returns `null` if Stripe has not yet loaded, no element of that type has been mounted, or the Stripe Elements container has been removed from the DOM.
 
+**Note:** Due to typing limitations with Stripe JS at the time of this library version, the return type is always the general `StripeElement` union. It is not narrowed to the specific element type for the `name` you pass in. If you need the specific type (e.g. `StripePaymentElement` for `'payment'`), narrow it yourself via a type assertion or a runtime type guard. TypeScript will not catch an incorrect assertion (e.g. casting the result of `getStripeElement('card')` to `StripePaymentElement`) at compile time.
+
 ```typescript
 // Collapse the payment element immediately if Stripe is already available
 if (form.hasStripeAvailable()) {
-    form.getStripeElement('payment')?.collapse();
+    const paymentElement = form.getStripeElement('payment') as StripePaymentElement | null;
+    paymentElement?.collapse();
+}
+```
+
+```javascript
+// JavaScript: no type assertion syntax, so just call the method directly.
+// `paymentElement` is whatever object Stripe actually returns at runtime.
+if (form.hasStripeAvailable()) {
+    const paymentElement = form.getStripeElement('payment');
+    paymentElement?.collapse();
 }
 ```
 
@@ -243,6 +255,8 @@ form.addEventListener('couponclear', () => {
 
 #### `CouponUsageDetails`
 
+The shape of `event.detail` for coupon-related events. Not a named export; TypeScript infers it automatically from `event.detail`, as shown in the example above. No import is needed to use it.
+
 | Property | Type | Description |
 |---|---|---|
 | `coupon` | `string` | The coupon code that was submitted |
@@ -308,6 +322,8 @@ bump.addEventListener('select', event => {
 ```
 
 #### `OrderBumpSelectionDetails`
+
+The shape of `event.detail` for selection events. Not a named export; TypeScript infers it automatically from `event.detail`, as shown in the example above. No import is needed to use it.
 
 | Property | Type | Description |
 |---|---|---|
@@ -383,9 +399,33 @@ accordion.addEventListener('open', event => {
 
 #### `AccordionInteractionDetails`
 
+The shape of `event.detail` for interaction events. Not a named export; TypeScript infers it automatically from `event.detail`, as shown in the example above. No import is needed to use it.
+
 | Property | Type | Description |
 |---|---|---|
 | `cause` | `UIEvent \| undefined` | The UI event that triggered the interaction. Absent if triggered programmatically. |
+
+---
+
+### `GHLElementsError`
+
+The base error class for all errors thrown by `ghl-elements`. Lets you distinguish errors originating from this library from your own application errors or other dependencies via `instanceof`, without relying on parsing error message text.
+
+```typescript
+import { GHLElementsError } from '@mdcline/ghl-elements';
+
+try {
+    form.getStripeElement('payment');
+} catch (error) {
+    if (error instanceof GHLElementsError) {
+        // Came from ghl-elements specifically.
+    } else {
+        throw error;
+    }
+}
+```
+
+`GHLElementsError` extends the built-in `Error` and adds no additional properties beyond `message`. It is thrown for internal invariant violations, such as calling a method before the library has finished initializing, or when the library detects it is running on a page that is not a GoHighLevel page.
 
 ---
 

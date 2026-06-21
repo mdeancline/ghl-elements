@@ -23,6 +23,11 @@ export interface AccordionEventMap {
     'open': CustomEvent<AccordionInteractionDetails>;
 }
 
+// @public
+export class GHLElementsError extends Error {
+    constructor(message: string);
+}
+
 // Warning: (ae-forgotten-export) The symbol "EventTargetBase" needs to be exported by the entry point index.d.ts
 //
 // @public
