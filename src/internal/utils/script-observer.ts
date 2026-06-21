@@ -1,4 +1,4 @@
-import { assert } from 'ts-essentials';
+import { assert } from "./utils";
 import { ElementCreationObserver } from '../dom/element-creation-observer';
 import { ScriptWatcher } from './script-watcher';
 

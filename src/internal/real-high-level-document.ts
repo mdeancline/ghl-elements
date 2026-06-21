@@ -1,9 +1,9 @@
 import { IterableWeakMap } from 'weakref';
 import { isGoHighLevel } from './utils/utils';
 import { AccordionFactory } from './accordion-factory';
-import { StandardAccordionImpl } from './standard-accordion-impl';
+import { StandardAccordion } from './standard-accordion';
 import { ElementCreationObserver } from './dom/element-creation-observer';
-import { FAQAccordionImpl } from './faq-accordion-impl';
+import { FAQAccordion } from './faq-accordion';
 import { HighLevelElement } from '../api/high-level-element';
 import { HighLevelElementFactory } from './high-level-element-factory';
 import { OrderFormFactory } from './order-form-factory';
@@ -12,18 +12,19 @@ import { HighLevelDocument } from '../api/high-level-document';
 import { StripeElementOrchestrator } from './stripe/stripe-element-orchestrator';
 import { Mounter } from './mounter';
 import { StripeRegistry as StripeRegistry } from './stripe/stripe-elements-registry';
+import { GHLElementsError } from '../api/ghl-elements-error';
 
-export class HighLevelDocumentImpl extends HighLevelDocument implements Mounter {
-    private static readonly INSTANCE: HighLevelDocumentImpl = new HighLevelDocumentImpl();
+export class RealHighLevelDocument extends HighLevelDocument implements Mounter {
+    private static readonly INSTANCE: RealHighLevelDocument = new RealHighLevelDocument();
 
-    private readonly elements: IterableWeakMap<HTMLElement, HighLevelElement<any, any>> = new IterableWeakMap;
-    private readonly creationObserver: ElementCreationObserver<HTMLElement> = new ElementCreationObserver;
-    private readonly stripeRegistry: StripeRegistry = new StripeRegistry;
+    private readonly elements = new IterableWeakMap<HTMLElement, HighLevelElement<any, any>>();
+    private readonly creationObserver = new ElementCreationObserver<HTMLElement>();
+    private readonly stripeRegistry: StripeRegistry = new StripeRegistry();
     private readonly stripeOrchestrator: StripeElementOrchestrator = new StripeElementOrchestrator(this, this.stripeRegistry);
 
     static {
         if (!isGoHighLevel()) {
-            throw new Error('GHL Elements is only compatible with GoHighLevel websites');
+            throw new GHLElementsError('Only compatible with GoHighLevel websites');
         }
     }
 
@@ -36,17 +37,17 @@ export class HighLevelDocumentImpl extends HighLevelDocument implements Mounter 
 
     private registerDefaultFactories(): void {
         this.register(new AccordionFactory('.accordion', '.accordion-trigger', (element, trigger) => {
-            return new StandardAccordionImpl(element, trigger);
+            return new StandardAccordion(element, trigger);
         }));
 
         this.register(new AccordionFactory('.hl-faq-child', '.hl-faq-child-heading', (element, trigger) => {
-            return new FAQAccordionImpl(element, trigger);
+            return new FAQAccordion(element, trigger);
         }));
 
         this.register(new OrderFormFactory(this, this.stripeRegistry));
     }
 
-    public static get instance(): HighLevelDocumentImpl {
+    public static get instance(): RealHighLevelDocument {
         return this.INSTANCE;
     }
 
@@ -104,4 +105,4 @@ export class HighLevelDocumentImpl extends HighLevelDocument implements Mounter 
  *
  * @public
  */
-export const hldocument: HighLevelDocument = HighLevelDocumentImpl.instance;
+export const hldocument: HighLevelDocument = RealHighLevelDocument.instance;

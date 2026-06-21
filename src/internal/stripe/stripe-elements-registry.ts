@@ -3,7 +3,7 @@ import { OrderForm } from "../../api/order-form";
 import { StripeElementsHandle } from "./stripe-elements-handle";
 
 export class StripeRegistry {
-    private readonly handles: WeakMap<HTMLDivElement, StripeElementsHandle> = new WeakMap;
+    private readonly handles = new WeakMap<HTMLDivElement, StripeElementsHandle>();
 
     public registerElements(form: OrderForm, container: StripeElements): void {
         this.getElementsHandle(form).resolveElements(container);
@@ -19,7 +19,12 @@ export class StripeRegistry {
 
     private getElementsHandle(form: OrderForm): StripeElementsHandle {
         const domElement = form.domElement;
-        return this.handles.get(domElement) ?? this.handles.set(domElement, new StripeElementsHandle).get(domElement)!;
+        const existing = this.handles.get(domElement);
+        if (existing) return existing;
+
+        const handle = new StripeElementsHandle();
+        this.handles.set(domElement, handle);
+        return handle;
     }
 
     public invalidate(form: OrderForm): void {
@@ -28,6 +33,7 @@ export class StripeRegistry {
 
     public hasElementsAvailable(form: OrderForm): boolean {
         const domElement = form.domElement;
-        return this.handles.has(domElement) && this.handles.get(domElement)!.isAvailable();
+        const handle = this.handles.get(domElement);
+        return handle !== undefined && handle.isAvailable();
     }
 }

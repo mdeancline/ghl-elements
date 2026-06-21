@@ -1,4 +1,4 @@
-import { assert } from "ts-essentials";
+import { assert } from "./utils/utils";
 import { AccordionEventMap } from "../api/accordion";
 import { AccordionBase } from "./accordion-base";
 import { HighLevelElementFactory } from "./high-level-element-factory";

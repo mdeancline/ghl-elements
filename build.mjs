@@ -41,6 +41,13 @@ if (!mainEntry) {
 // External packages — never bundle peer dependencies
 const external = Object.keys(pkg.peerDependencies ?? {});
 
+console.log('Linting...');
+try {
+    execSync('npx eslint .', { stdio: 'inherit' });
+} catch {
+    process.exit(1);
+}
+
 console.log('Type checking...');
 try {
     execSync('npx tsc --noEmit', { stdio: 'inherit' });

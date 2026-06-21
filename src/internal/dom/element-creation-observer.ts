@@ -1,16 +1,16 @@
-import { assert } from "ts-essentials";
+import { assert } from "../utils/utils";
 
 export type CreationWatcher<E extends Element> = (element: E) => void;
 
 export class ElementCreationObserver<E extends Element> {
     private readonly mutationObserver: MutationObserver = this.createMutationObserver();
-    private readonly currentWatchers: Map<string, Set<CreationWatcher<E>>> = new Map();
+    private readonly currentWatchers = new Map<string, Set<CreationWatcher<E>>>();
     private readonly root: Element;
     private readonly options: MutationObserverInit = {
         childList: true,
         subtree: true
     };
-    private observing: boolean = false;
+    private observing = false;
 
     public constructor(root: Element = document.body, options: MutationObserverInit = {}) {
         this.root = root;
@@ -20,11 +20,13 @@ export class ElementCreationObserver<E extends Element> {
     public watchSelector<EE extends E>(selector: string, callback: CreationWatcher<EE>): void {
         assert(this.observing, `${this.constructor.name} is not currently observing`);
 
-        if (!this.currentWatchers.has(selector)) {
-            this.currentWatchers.set(selector, new Set());
+        let watchers = this.currentWatchers.get(selector);
+        if (!watchers) {
+            watchers = new Set();
+            this.currentWatchers.set(selector, watchers);
         }
 
-        this.currentWatchers.get(selector)!.add(callback as CreationWatcher<E>);
+        watchers.add(callback as CreationWatcher<E>);
     }
 
     public watchAll<EE extends E>(callback: CreationWatcher<EE>): void {
@@ -32,10 +34,10 @@ export class ElementCreationObserver<E extends Element> {
     }
 
     public unwatchSelector(selector: string, callback: CreationWatcher<E> | null = null): void {
-        if (!this.currentWatchers.has(selector)) return;
+        const callbacks = this.currentWatchers.get(selector);
+        if (!callbacks) return;
 
         if (callback) {
-            const callbacks = this.currentWatchers.get(selector)!;
             callbacks.delete(callback);
 
             if (callbacks.size === 0) {
@@ -43,10 +45,6 @@ export class ElementCreationObserver<E extends Element> {
             }
         } else {
             this.currentWatchers.delete(selector);
-        }
-
-        if (this.currentWatchers.size === 0) {
-            this.stop();
         }
     }
 

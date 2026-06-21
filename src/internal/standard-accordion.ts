@@ -1,7 +1,7 @@
 import { AccordionEventMap, AccordionInteractionDetails } from "../api/accordion";
 import { AccordionBase } from "./accordion-base";
 
-export class StandardAccordionImpl extends AccordionBase {
+export class StandardAccordion extends AccordionBase {
     protected readonly trigger: HTMLElement;
 
     public constructor(element: HTMLDivElement, trigger: HTMLElement) {
@@ -14,18 +14,20 @@ export class StandardAccordionImpl extends AccordionBase {
     }
 
     protected openFromCause(cause?: UIEvent): void {
-        if (this.isActive()) return;
-        this.element.classList.add('active');
-        this.dispatch('open', cause);
+        if (!this.isActive()) {
+            this.element.classList.add('active');
+            this.dispatchAccordionEvent('open', cause);
+        }
     }
 
     protected closeFromCause(cause?: UIEvent): void {
-        if (!this.isActive) return;
-        this.element.classList.remove('active');
-        this.dispatch('close', cause);
+        if (this.isActive()) {
+            this.element.classList.remove('active');
+            this.dispatchAccordionEvent('close', cause);
+        }
     }
 
-    protected dispatch(action: keyof AccordionEventMap & string, cause?: UIEvent): void {
+    protected dispatchAccordionEvent(action: keyof AccordionEventMap & string, cause?: UIEvent): void {
         const details: AccordionInteractionDetails = { ...(cause && { cause }) };
         const event = new CustomEvent(action, { bubbles: true, detail: details });
         this.dispatchEvent(event);
@@ -43,6 +45,10 @@ export class StandardAccordionImpl extends AccordionBase {
     }
 
     protected override toggleFromCause(cause?: UIEvent): void {
-        this.isActive() ? this.closeFromCause(cause) : this.openFromCause(cause);
+        if (this.isActive()) {
+            this.closeFromCause(cause);
+        } else {
+            this.openFromCause(cause);
+        }
     }
 }

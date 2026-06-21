@@ -1,13 +1,13 @@
 import { Stripe, StripeElement, StripeElements } from '@stripe/stripe-js';
 import { StripeInterceptor } from './stripe-interceptor';
-import { wrap, monitor } from '../utils/proxies';
+import { wrap, monitor } from '../utils/utils';
 import { ScriptObserver } from '../utils/script-observer';
-import { OrderFormImpl } from '../order-form-impl';
+import { RealOrderForm } from '../real-order-form';
 import { HighLevelDocument } from '../../api/high-level-document';
 import { StripeRegistry as StripeRegistry } from './stripe-elements-registry';
 
 export class StripeElementOrchestrator {
-    private readonly scriptObserver: ScriptObserver = new ScriptObserver;
+    private readonly scriptObserver: ScriptObserver = new ScriptObserver();
 
     public constructor(
         private readonly hldocument: HighLevelDocument,
@@ -53,14 +53,14 @@ export class StripeElementOrchestrator {
             return;
         }
 
-        const orderFormElement = mountingElement.closest<HTMLElement>(OrderFormImpl.SELECTOR);
+        const orderFormElement = mountingElement.closest<HTMLElement>(RealOrderForm.SELECTOR);
 
         if (!orderFormElement) {
             console.warn(`Could not find order form for selector "${selector}"`);
             return;
         }
 
-        const orderForm = this.hldocument.getElementByNode(orderFormElement, OrderFormImpl);
+        const orderForm = this.hldocument.getElementByNode(orderFormElement, RealOrderForm);
 
         if (!orderForm) {
             console.warn(`Order form element found but not registered for selector "${selector}"`);
@@ -71,7 +71,7 @@ export class StripeElementOrchestrator {
         this.stripeRegistry.registerElements(orderForm, stripeElements)
     }
 
-    private watchForRemoval(mountingElement: HTMLElement, orderForm: OrderFormImpl): void {
+    private watchForRemoval(mountingElement: HTMLElement, orderForm: RealOrderForm): void {
         const observer = new MutationObserver(() => {
             if (document.contains(mountingElement)) {
                 this.stripeRegistry.invalidate(orderForm);

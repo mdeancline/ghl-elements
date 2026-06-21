@@ -1,14 +1,14 @@
 import { Mountable } from "./mountable";
 import { OrderBump, OrderBumpEventMap, OrderBumpSelectionDetails } from "../api/order-bump";
-import { assert } from "ts-essentials";
+import { assert } from "./utils/utils";
 import { OrderForm } from "../api/order-form";
 
-export class OrderBumpImpl extends OrderBump implements Mountable {
+export class RealOrderBump extends OrderBump implements Mountable {
     private readonly checkboxElement: HTMLInputElement;
 
     public constructor(private readonly orderForm: OrderForm, private readonly element: HTMLElement) {
         super();
-        const checkboxElement = element.querySelector('input[type="checkbox"]') as HTMLInputElement;
+        const checkboxElement = element.querySelector<HTMLInputElement>('input[type="checkbox"]');
         assert(checkboxElement !== null, 'input[type="checkbox"] not found');
         this.checkboxElement = checkboxElement;
     }

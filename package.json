@@ -35,6 +35,8 @@
         "url": "git+https://github.com/mdeancline/ghl-elements.git"
     },
     "scripts": {
+        "lint": "eslint .",
+        "lint:fix": "eslint . --fix",
         "clean": "node clean.mjs",
         "build:types": "tsc --project tsconfig.json",
         "build:js": "node build.mjs",
@@ -59,18 +61,21 @@
     },
     "dependencies": {
         "ts-deferred": "^1.0.4",
-        "ts-essentials": "^10.2.0",
         "weakref": "^0.2.4"
     },
     "devDependencies": {
+        "@eslint/js": "^10.0.1",
         "@microsoft/api-extractor": "^7.58.9",
         "@stripe/stripe-js": "^9.3.1",
+        "@stylistic/eslint-plugin": "^5.10.0",
         "@types/jsdom": "^28.0.3",
         "@vitest/coverage-v8": "^4.1.7",
         "chalk": "^5.6.2",
         "esbuild": "^0.28.0",
+        "eslint": "^10.5.0",
         "jsdom": "^29.1.1",
         "typescript": "^5.7.2",
+        "typescript-eslint": "^8.61.1",
         "vitest": "^4.1.7"
     }
 }

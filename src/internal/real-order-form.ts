@@ -3,13 +3,13 @@ import { ElementUpdateObserver } from './dom/element-update-observer';
 import { OrderBump } from '../api/order-bump';
 import { StripeElement, StripeElements, StripeElementType } from '@stripe/stripe-js';
 import { OrderForm, CouponUsageDetails, OrderFormEventMap } from '../api/order-form';
-import { OrderBumpImpl } from './order-bump-impl';
+import { RealOrderBump } from './real-order-bump';
 import { Mountable } from './mountable';
 import { HighLevelDocument } from '../api/high-level-document';
 import { Mounter } from './mounter';
 import { StripeRegistry } from './stripe/stripe-elements-registry';
 
-export class OrderFormImpl extends OrderForm implements Mountable {
+export class RealOrderForm extends OrderForm implements Mountable {
     public static readonly SELECTOR: string = '.c-order';
 
     private static readonly ORDER_BUMP_SELECTOR: string = '.order-bump-container';
@@ -17,15 +17,15 @@ export class OrderFormImpl extends OrderForm implements Mountable {
     private static readonly COUPON_INPUT_SELECTOR: string = 'input.coupon-input';
     private static readonly COUPON_APPLIED_TEXT_SELECTOR: string = '.coupon-applied-text';
 
-    private readonly couponBtnListeners: WeakSet<HTMLButtonElement> = new WeakSet();
+    private readonly couponBtnListeners = new WeakSet<HTMLButtonElement>();
     private couponBtnRef: WeakRef<HTMLButtonElement> | null = null;
     private couponInputRef: WeakRef<HTMLInputElement> | null = null;
     private appliedCoupon: string | null = null;
-    private submittingCoupon: boolean = false;
+    private submittingCoupon = false;
 
     private readonly creationObserver: ElementCreationObserver<HTMLElement>;
     private readonly updateObserver: ElementUpdateObserver<HTMLElement>;
-    private readonly currentOrderBumps: Map<string, OrderBumpImpl> = new Map;
+    private readonly currentOrderBumps = new Map<string, RealOrderBump>();
 
     public constructor(
         private readonly hldocument: HighLevelDocument & Mounter,
@@ -38,9 +38,9 @@ export class OrderFormImpl extends OrderForm implements Mountable {
     }
 
     public mount(): void {
-        for (const orderBumpElement of this.domElement.querySelectorAll<HTMLElement>(OrderFormImpl.ORDER_BUMP_SELECTOR)) {
+        for (const orderBumpElement of this.domElement.querySelectorAll<HTMLElement>(RealOrderForm.ORDER_BUMP_SELECTOR)) {
             const id = orderBumpElement.id || `${this.domElement.id}-bump-${this.currentOrderBumps.size + 1}`;
-            const bump = new OrderBumpImpl(this, orderBumpElement);
+            const bump = new RealOrderBump(this, orderBumpElement);
             this.currentOrderBumps.set(id, bump);
             this.hldocument.mount(bump);
         }
@@ -51,7 +51,7 @@ export class OrderFormImpl extends OrderForm implements Mountable {
         if (this.hasCouponsEnabled()) {
             this.mountCouponHandling();
         } else {
-            this.creationObserver.watchSelector(OrderFormImpl.COUPON_BTN_SELECTOR, (btn: HTMLButtonElement) => {
+            this.creationObserver.watchSelector(RealOrderForm.COUPON_BTN_SELECTOR, (btn: HTMLButtonElement) => {
                 this.couponBtnRef = new WeakRef(this.attachCouponButtonListeners(btn));
                 this.mountCouponHandling();
             });
@@ -66,7 +66,7 @@ export class OrderFormImpl extends OrderForm implements Mountable {
 
         this.element.addEventListener('click', e => {
             const target = e.target;
-            if (!this.couponBtnRef?.deref() && target instanceof HTMLButtonElement && target.matches(OrderFormImpl.COUPON_BTN_SELECTOR)) {
+            if (!this.couponBtnRef?.deref() && target instanceof HTMLButtonElement && target.matches(RealOrderForm.COUPON_BTN_SELECTOR)) {
                 this.couponBtnRef = new WeakRef(this.attachCouponButtonListeners(target));
             }
         });
@@ -74,7 +74,7 @@ export class OrderFormImpl extends OrderForm implements Mountable {
         const existingBtn = this.couponButton;
         if (existingBtn) this.attachCouponButtonListeners(existingBtn);
 
-        const existingInput = this.element.querySelector<HTMLInputElement>(OrderFormImpl.COUPON_INPUT_SELECTOR);
+        const existingInput = this.element.querySelector<HTMLInputElement>(RealOrderForm.COUPON_INPUT_SELECTOR);
         if (existingInput) this.couponInputRef = new WeakRef(existingInput);
 
         this.watchCouponButton();
@@ -83,7 +83,7 @@ export class OrderFormImpl extends OrderForm implements Mountable {
     }
 
     private watchCouponButton(): void {
-        this.creationObserver.watchSelector(OrderFormImpl.COUPON_BTN_SELECTOR, (btn: HTMLButtonElement) => {
+        this.creationObserver.watchSelector(RealOrderForm.COUPON_BTN_SELECTOR, (btn: HTMLButtonElement) => {
             this.couponBtnRef = new WeakRef(this.attachCouponButtonListeners(btn));
         });
     }
@@ -115,11 +115,11 @@ export class OrderFormImpl extends OrderForm implements Mountable {
     }
 
     private watchCouponInput(): void {
-        this.creationObserver.watchSelector(OrderFormImpl.COUPON_INPUT_SELECTOR, (input: HTMLInputElement) => {
+        this.creationObserver.watchSelector(RealOrderForm.COUPON_INPUT_SELECTOR, (input: HTMLInputElement) => {
             this.couponInputRef = new WeakRef(input);
         });
 
-        this.updateObserver.watchSelector(OrderFormImpl.COUPON_INPUT_SELECTOR, (input: HTMLInputElement, info): void => {
+        this.updateObserver.watchSelector(RealOrderForm.COUPON_INPUT_SELECTOR, (input: HTMLInputElement, info): void => {
             if (!this.submittingCoupon || !this.couponButton) return;
             if (info.type !== 'attributes' || info.attributeName !== 'class') return;
             if (!input.classList.contains('text-box-error') || input.value.length === 0) return;
@@ -130,7 +130,7 @@ export class OrderFormImpl extends OrderForm implements Mountable {
     }
 
     private watchCouponAppliedText(): void {
-        this.creationObserver.watchSelector(OrderFormImpl.COUPON_APPLIED_TEXT_SELECTOR, () => {
+        this.creationObserver.watchSelector(RealOrderForm.COUPON_APPLIED_TEXT_SELECTOR, () => {
             if (!this.submittingCoupon) return;
 
             const coupon = this.couponInputRef?.deref()?.value ?? '';
@@ -147,7 +147,7 @@ export class OrderFormImpl extends OrderForm implements Mountable {
         return this.element;
     }
 
-    public hasCouponsEnabled(): this is OrderFormImpl & { couponButton: HTMLButtonElement } {
+    public hasCouponsEnabled(): this is RealOrderForm & { couponButton: HTMLButtonElement } {
         return this.couponButton !== null;
     }
 
@@ -159,7 +159,7 @@ export class OrderFormImpl extends OrderForm implements Mountable {
         const cached = this.couponBtnRef?.deref() ?? null;
         if (cached) return cached;
 
-        const found = this.element.querySelector<HTMLButtonElement>(OrderFormImpl.COUPON_BTN_SELECTOR);
+        const found = this.element.querySelector<HTMLButtonElement>(RealOrderForm.COUPON_BTN_SELECTOR);
         if (found) this.couponBtnRef = new WeakRef(found);
         return found;
     }
@@ -168,11 +168,11 @@ export class OrderFormImpl extends OrderForm implements Mountable {
         if (this.submittingCoupon || !this.hasCouponsEnabled()) return false;
 
         const couponInput = this.couponInputRef?.deref()
-            ?? this.element.querySelector<HTMLInputElement>(OrderFormImpl.COUPON_INPUT_SELECTOR);
+            ?? this.element.querySelector<HTMLInputElement>(RealOrderForm.COUPON_INPUT_SELECTOR);
 
         const couponBtn = this.couponButton;
 
-        if (!couponInput || !couponBtn) return false;
+        if (!couponInput) return false;
 
         this.couponInputRef = new WeakRef(couponInput);
         this.couponBtnRef = new WeakRef(this.attachCouponButtonListeners(couponBtn));

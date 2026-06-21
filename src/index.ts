@@ -1,4 +1,4 @@
-export { hldocument } from './internal/high-level-document-impl';
+export { hldocument } from './internal/real-high-level-document';
 export { HighLevelDocument, HighLevelDocumentEventMap } from './api/high-level-document';
 export { HighLevelElement } from './api/high-level-element';
 export { Accordion, AccordionEventMap } from './api/accordion';

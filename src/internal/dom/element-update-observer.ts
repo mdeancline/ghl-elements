@@ -1,4 +1,5 @@
-import { assert } from "ts-essentials";
+import { assert } from "../utils/utils";
+import { GHLElementsError } from "../../api/ghl-elements-error";
 
 export interface ElementUpdateInfo {
     type: 'attributes' | 'characterData' | 'childList';
@@ -26,11 +27,11 @@ export type UpdateCallback<E extends Element> = (element: E, info: ElementUpdate
 
 export class ElementUpdateObserver<E extends Element> {
     private readonly mutationObserver: MutationObserver = this.createObserver();
-    private readonly elementSelectorCache: WeakMap<Element, Set<string>> = new WeakMap();
-    private readonly attributeWatcherIndex: Map<string, Set<string>> = new Map();
-    private readonly currentWatchers: Map<string, Set<WatcherData<E>>> = new Map();
-    private root: Element;
-    private observing: boolean = false;
+    private readonly elementSelectorCache = new WeakMap<Element, Set<string>>();
+    private readonly attributeWatcherIndex = new Map<string, Set<string>>();
+    private readonly currentWatchers = new Map<string, Set<WatcherData<E>>>();
+    private readonly root: Element;
+    private observing = false;
     private readonly options: MutationObserverInit = {
         attributes: true,
         attributeOldValue: true,
@@ -56,29 +57,32 @@ export class ElementUpdateObserver<E extends Element> {
             ...options
         };
 
-        if (!this.currentWatchers.has(selector)) {
-            this.currentWatchers.set(selector, new Set());
+        let watchers = this.currentWatchers.get(selector);
+        if (!watchers) {
+            watchers = new Set();
+            this.currentWatchers.set(selector, watchers);
         }
 
-        this.currentWatchers.get(selector)!.add({ callback, options: watchOptions } as WatcherData<E>);
+        watchers.add({ callback, options: watchOptions } as WatcherData<E>);
 
         if (watchOptions.attributeFilter) {
             for (const attr of watchOptions.attributeFilter) {
-                if (!this.attributeWatcherIndex.has(attr)) {
-                    this.attributeWatcherIndex.set(attr, new Set());
+                let attrWatchers = this.attributeWatcherIndex.get(attr);
+                if (!attrWatchers) {
+                    attrWatchers = new Set();
+                    this.attributeWatcherIndex.set(attr, attrWatchers);
                 }
 
-                this.attributeWatcherIndex.get(attr)!.add(selector);
+                attrWatchers.add(selector);
             }
         }
     }
 
     public unwatchSelector(selector: string, callback: UpdateCallback<E> | null = null): void {
-        if (!this.currentWatchers.has(selector)) return;
+        const watchers = this.currentWatchers.get(selector);
+        if (!watchers) return;
 
         if (callback) {
-            const watchers = this.currentWatchers.get(selector)!;
-
             for (const watcher of watchers) {
                 if (watcher.callback === callback) {
                     watchers.delete(watcher);
@@ -144,7 +148,7 @@ export class ElementUpdateObserver<E extends Element> {
                 const matchingSelectors = this.resolveMatchingSelectors(element, mutation);
                 if (matchingSelectors.size === 0) continue;
 
-                const updateInfo = this.buildUpdateInfo(mutation);
+                const updateInfo = ElementUpdateObserver.buildUpdateInfo(mutation);
 
                 for (const selector of matchingSelectors) {
                     const watchers = this.currentWatchers.get(selector);
@@ -169,14 +173,14 @@ export class ElementUpdateObserver<E extends Element> {
         const matchingSelectors = this.resolveMatchingSelectors(element, mutation);
         if (matchingSelectors.size === 0) return;
 
-        const updateInfo = this.buildUpdateInfo(mutation);
+        const updateInfo = ElementUpdateObserver.buildUpdateInfo(mutation);
 
         for (const selector of matchingSelectors) {
             const watchers = this.currentWatchers.get(selector);
             if (!watchers) continue;
 
             for (const { callback, options } of watchers) {
-                if (!this.shouldTrigger(mutation, options)) continue;
+                if (!ElementUpdateObserver.shouldTrigger(mutation, options)) continue;
 
                 try {
                     callback(element as E, updateInfo);
@@ -188,21 +192,21 @@ export class ElementUpdateObserver<E extends Element> {
     }
 
     private resolveMatchingSelectors(element: Element, mutation: MutationRecord): Set<string> {
-        if (!this.elementSelectorCache.has(element)) {
-            const matched = new Set<string>();
+        let cached = this.elementSelectorCache.get(element);
+
+        if (!cached) {
+            cached = new Set<string>();
 
             for (const selector of this.currentWatchers.keys()) {
                 try {
-                    if (element.matches(selector)) matched.add(selector);
+                    if (element.matches(selector)) cached.add(selector);
                 } catch {
                     console.error(`Invalid selector "${selector}"`);
                 }
             }
 
-            this.elementSelectorCache.set(element, matched);
+            this.elementSelectorCache.set(element, cached);
         }
-
-        const cached = this.elementSelectorCache.get(element)!;
 
         if (mutation.type === 'attributes' && mutation.attributeName) {
             const indexedSelectors = this.attributeWatcherIndex.get(mutation.attributeName);
@@ -220,11 +224,11 @@ export class ElementUpdateObserver<E extends Element> {
         return [...watchers].some(w => w.options.attributeFilter !== null);
     }
 
-    private shouldTrigger(mutation: MutationRecord, options: Required<WatchOptions>): boolean {
+    private static shouldTrigger(mutation: MutationRecord, options: Required<WatchOptions>): boolean {
         if (mutation.type === 'attributes') {
             if (!options.attributes) return false;
             if (options.attributeFilter && options.attributeFilter.length > 0) {
-                return options.attributeFilter.includes(mutation.attributeName!);
+                return mutation.attributeName !== null && options.attributeFilter.includes(mutation.attributeName);
             }
             return true;
         }
@@ -236,22 +240,30 @@ export class ElementUpdateObserver<E extends Element> {
         return false;
     }
 
-    private buildUpdateInfo(mutation: MutationRecord): ElementUpdateInfo {
+    private static buildUpdateInfo(mutation: MutationRecord): ElementUpdateInfo {
         const info: ElementUpdateInfo = {
             type: mutation.type as 'attributes' | 'characterData' | 'childList',
             target: mutation.target
         };
 
-        if (mutation.type === 'attributes') {
-            info.attributeName = mutation.attributeName!;
-            info.oldValue = mutation.oldValue;
-            info.newValue = (mutation.target as Element).getAttribute(mutation.attributeName!);
-        } else if (mutation.type === 'characterData') {
-            info.oldValue = mutation.oldValue;
-            info.newValue = mutation.target.textContent;
-        } else if (mutation.type === 'childList') {
-            info.addedNodes = mutation.addedNodes;
-            info.removedNodes = mutation.removedNodes;
+        switch (mutation.type) {
+            case 'attributes':
+                if (mutation.attributeName !== null) {
+                    info.attributeName = mutation.attributeName;
+                }
+                info.oldValue = mutation.oldValue;
+                info.newValue = (mutation.target as Element).getAttribute(mutation.attributeName ?? '');
+                break;
+            case 'characterData':
+                info.oldValue = mutation.oldValue;
+                info.newValue = mutation.target.textContent;
+                break;
+            case 'childList':
+                info.addedNodes = mutation.addedNodes;
+                info.removedNodes = mutation.removedNodes;
+                break;
+            default:
+                throw new GHLElementsError(`Unrecognized mutation type "${mutation.type}"`);
         }
 
         return info;
