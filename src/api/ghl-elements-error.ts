@@ -18,6 +18,7 @@
  *     }
  * }
  * ```
+ * @public
  */
 export class GHLElementsError extends Error {
     public constructor(message: string) {
