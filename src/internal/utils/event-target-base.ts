@@ -1,11 +1,11 @@
-export abstract class EventTargetBase<M extends Record<keyof M, M[keyof M]>> implements EventTarget {
+export abstract class EventTargetBase<M extends Record<keyof M, Event>> implements EventTarget {
     private static readonly EMPTY_LISTENERS: readonly EventListener[] = [];
 
-    private readonly listeners: Map<string, Set<EventListener>> = new Map();
-    private readonly captureListeners: Map<string, Set<EventListener>> = new Map();
-    private readonly onceWrappers: WeakMap<EventListener, EventListener> = new WeakMap();
-    private readonly passiveListeners: WeakSet<EventListener> = new WeakSet();
-    private passiveCount: number = 0;
+    private readonly listeners = new Map<string, Set<EventListener>>();
+    private readonly captureListeners = new Map<string, Set<EventListener>>();
+    private readonly onceWrappers = new WeakMap<EventListener, EventListener>();
+    private readonly passiveListeners = new WeakSet<EventListener>();
+    private passiveCount = 0;
 
     public addEventListener<K extends keyof M & string>(type: K, listener: (this: this, ev: M[K]) => any, options?: boolean | AddEventListenerOptions): void;
     public addEventListener<K extends keyof M & string>(type: K, listener: EventListenerOrEventListenerObject | null, options?: boolean | AddEventListenerOptions): void;
@@ -61,9 +61,7 @@ export abstract class EventTargetBase<M extends Record<keyof M, M[keyof M]>> imp
         this.onceWrappers.delete(fn);
     }
 
-    public dispatchEvent<K extends keyof M & string>(event: M[K]): boolean;
-    public dispatchEvent(event: Event): boolean;
-    public dispatchEvent(event: Event): boolean {
+    public dispatchEvent<K extends keyof M & string>(event: M[K]): boolean {
         for (const listener of this.listeners.get(event.type) ?? EventTargetBase.EMPTY_LISTENERS) {
             listener(event);
             if (event.cancelable && event.defaultPrevented && (this.passiveCount === 0 || !this.passiveListeners.has(listener))) return false;
