@@ -48,7 +48,7 @@
         "ship:prod": "npm run build && npm publish --access public"
     },
     "peerDependencies": {
-        "@stripe/stripe-js": ">=9.2.0",
+        "@stripe/stripe-js": ">=6.0.0 <7.0.0",
         "typescript": ">=5.0.0"
     },
     "peerDependenciesMeta": {

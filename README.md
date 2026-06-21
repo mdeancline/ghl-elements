@@ -11,7 +11,7 @@ npm install @mdcline/ghl-elements
 If you are using Stripe as a payment integration on your HighLevel page, install the peer dependency as well:
 
 ```bash
-npm install @stripe/stripe-js@^9.2.0
+npm install @stripe/stripe-js@^6.0.0
 ```
 
 ---
