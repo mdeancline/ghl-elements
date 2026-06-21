@@ -28,7 +28,7 @@ export abstract class HighLevelDocument extends EventTargetBase<HighLevelDocumen
      * @example
      * ```typescript
      * const node = document.getElementById('one-step-order-IjosAGseXl');
-     * const form = hldocument.getElementByNode(node, OrderForm) as OrderForm;
+     * const form = hldocument.getElementByNode(node, OrderForm);
      * ```
      */
     abstract getElementByNode<E extends HTMLElement, M extends Record<keyof M, M[keyof M]>, T extends HighLevelElement<E, M>>(node: E, constructor: abstract new (...args: any[]) => T): T | undefined;
@@ -42,7 +42,7 @@ export abstract class HighLevelDocument extends EventTargetBase<HighLevelDocumen
      * 
      * @example
      * ```typescript
-     * const form = hldocument.getElementById('one-step-order-IjosAGseXl', OrderForm) as OrderForm;
+     * const form = hldocument.getElementById('one-step-order-IjosAGseXl', OrderForm);
      * ```
      */
     abstract getElementById<E extends HTMLElement, M extends Record<keyof M, M[keyof M]>, T extends HighLevelElement<E, M>>(id: string, constructor: abstract new (...args: any[]) => T): T | undefined;
@@ -55,7 +55,7 @@ export abstract class HighLevelDocument extends EventTargetBase<HighLevelDocumen
      * 
      * @example
      * ```typescript
-     * const forms = hldocument.getElementsByType(OrderForm) as OrderForm[];
+     * const forms = hldocument.getElementsByType(OrderForm);
      * ```
      */
     abstract getElementsByType<E extends HTMLElement, M extends Record<keyof M, M[keyof M]>, T extends HighLevelElement<E, M>>(constructor: abstract new (...args: any[]) => T): readonly T[];
@@ -68,7 +68,7 @@ export abstract class HighLevelDocument extends EventTargetBase<HighLevelDocumen
      * 
      * @example
      * ```typescript
-     * const form = hldocument.getFirstElementByType(OrderForm) as OrderForm;
+     * const form = hldocument.getFirstElementByType(OrderForm);
      * ```
      */
     abstract getFirstElementByType<E extends HTMLElement, M extends Record<keyof M, M[keyof M]>, T extends HighLevelElement<E, M>>(constructor: abstract new (...args: any[]) => T): T | undefined;
