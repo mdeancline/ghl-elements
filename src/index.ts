@@ -5,3 +5,4 @@ export { HighLevelElement } from './api/high-level-element';
 export { Accordion, AccordionEventMap } from './api/accordion';
 export { OrderForm, OrderFormEventMap } from './api/order-form';
 export { OrderBump, OrderBumpEventMap } from './api/order-bump';
+// TODO create custom console logging formatter
