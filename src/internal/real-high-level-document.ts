@@ -14,7 +14,7 @@ import { Mounter } from './mounter';
 import { StripeRegistry as StripeRegistry } from './stripe/stripe-elements-registry';
 import { GHLElementsError } from '../api/ghl-elements-error';
 
-export class RealHighLevelDocument extends HighLevelDocument implements Mounter {
+class RealHighLevelDocument extends HighLevelDocument implements Mounter {
     private static readonly INSTANCE: RealHighLevelDocument = new RealHighLevelDocument();
 
     private readonly elements = new IterableWeakMap<HTMLElement, HighLevelElement<any, any>>();
