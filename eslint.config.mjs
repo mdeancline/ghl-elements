@@ -48,6 +48,35 @@ export default defineConfig(
             'eqeqeq': 'error',
             'no-console': ['warn', { allow: ['warn', 'error'] }],
             '@stylistic/new-parens': 'error',
+            'spaced-comment': [
+                'error',
+                'always',
+                {
+                    markers: [
+                        '!',
+                        '?',
+                        '*',
+                        '//',
+                        'todo',
+                        'TODO',
+                        'bug',
+                        'BUG',
+                        'hack',
+                        'HACK',
+                        'fixme',
+                        'FIXME',
+                        'xxx',
+                        'XXX',
+                        'fix',
+                        'FIX',
+                        'fixit',
+                        'FIXIT',
+                        '#region',
+                        '#endregion'
+                    ],
+                    exceptions: ['-', '+']
+                }
+            ],
         },
     },
     {
