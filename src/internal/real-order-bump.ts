@@ -22,16 +22,19 @@ export class RealOrderBump extends OrderBump implements Mountable {
         });
     }
 
+    // BUG doesn't actually get selected
     public select(): void {
         this.checkboxElement.checked = true;
         this.checkboxElement.dispatchEvent(new Event('change'));
     }
 
+    // BUG doesn't actually get deselected
     public deselect(): void {
         this.checkboxElement.checked = false;
         this.checkboxElement.dispatchEvent(new Event('change'));
     }
 
+    // BUG always returns false
     public isSelected(): boolean {
         return this.checkboxElement.checked;
     }
