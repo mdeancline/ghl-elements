@@ -11,7 +11,7 @@ import { Mountable } from './mountable';
 import { HighLevelDocument } from '../api/high-level-document';
 import { StripeElementOrchestrator } from './stripe/stripe-element-orchestrator';
 import { Mounter } from './mounter';
-import { StripeRegistry as StripeRegistry } from './stripe/stripe-elements-registry';
+import { StripeRegistry as StripeRegistry } from './stripe/stripe-registry';
 import { GHLElementsError } from '../api/ghl-elements-error';
 
 class RealHighLevelDocument extends HighLevelDocument implements Mounter {

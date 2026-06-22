@@ -7,7 +7,7 @@ import { RealOrderBump } from './real-order-bump';
 import { Mountable } from './mountable';
 import { HighLevelDocument } from '../api/high-level-document';
 import { Mounter } from './mounter';
-import { StripeRegistry } from './stripe/stripe-elements-registry';
+import { StripeRegistry } from './stripe/stripe-registry';
 
 export class RealOrderForm extends OrderForm implements Mountable {
     public static readonly SELECTOR: string = '.c-order';

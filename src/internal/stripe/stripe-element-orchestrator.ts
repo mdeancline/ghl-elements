@@ -4,7 +4,7 @@ import { wrap, monitor } from '../utils/utils';
 import { ScriptObserver } from '../utils/script-observer';
 import { RealOrderForm } from '../real-order-form';
 import { HighLevelDocument } from '../../api/high-level-document';
-import { StripeRegistry as StripeRegistry } from './stripe-elements-registry';
+import { StripeRegistry as StripeRegistry } from './stripe-registry';
 
 export class StripeElementOrchestrator {
     private readonly scriptObserver: ScriptObserver = new ScriptObserver();
