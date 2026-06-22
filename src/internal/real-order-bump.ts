@@ -3,6 +3,7 @@ import { OrderBump, OrderBumpEventMap, OrderBumpSelectionDetails } from "../api/
 import { assert } from "./utils/utils";
 import { OrderForm } from "../api/order-form";
 
+// TODO reinforce order bump checkbox element in a lazy-updated WeakRef
 export class RealOrderBump extends OrderBump implements Mountable {
     private readonly checkboxElement: HTMLInputElement;
 
