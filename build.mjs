@@ -67,7 +67,7 @@ await esbuild.build({
     format: 'esm',
     platform: buildPlatform,
     target: buildTarget,
-    minify: false,
+    minify: true,
     treeShaking: true,
     keepNames: true,
     external,
