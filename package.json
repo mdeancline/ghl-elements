@@ -65,7 +65,6 @@
     "devDependencies": {
         "@eslint/js": "^10.0.1",
         "@microsoft/api-extractor": "^7.58.9",
-        "@stripe/stripe-js": "^9.3.1",
         "@stylistic/eslint-plugin": "^5.10.0",
         "@types/jsdom": "^28.0.3",
         "@vitest/coverage-v8": "^4.1.7",
