@@ -5,13 +5,13 @@ A framework for building custom element behavior on [GoHighLevel](https://www.go
 ## Installation
 
 ```bash
-npm install @mdcline/ghl-elements
+npm i @mdcline/ghl-elements
 ```
 
-If you are using Stripe as a payment integration on your HighLevel page, install the peer dependency as well:
+If your HighLevel page uses Stripe as a payment integration and you plan to develop against it using `ghl-elements`, install `@stripe/stripe-js` as a dev dependency. HighLevel loads it during runtime, so you don't need it in production. The correct version will be resolved automatically.
 
 ```bash
-npm install @stripe/stripe-js@^6.0.0
+npm i -D @stripe/stripe-js
 ```
 
 ---
