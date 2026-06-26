@@ -1,7 +1,0 @@
-{
-    "output": {
-        "external": [
-            "@stripe/stripe-js"
-        ]
-    }
-}
