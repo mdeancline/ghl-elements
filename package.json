@@ -37,6 +37,7 @@
     "scripts": {
         "lint": "eslint .",
         "lint:fix": "eslint . --fix",
+        "changelog": "conventional-changelog -p angular -i CHANGELOG.md -s",
         "clean": "node clean.mjs",
         "build:types": "tsc --project tsconfig.json",
         "build:js": "node build.mjs",
@@ -45,7 +46,7 @@
         "rebuild": "npm run clean && npm run build",
         "prepublishOnly": "npm run build",
         "ship:dry": "npm run build && npm publish --dry-run --access public",
-        "ship:prod": "npm run build && npm publish --access public"
+        "ship:prod": "npm run changelog && npm run build && npm publish --access public"
     },
     "peerDependencies": {
         "@stripe/stripe-js": ">=6.0.0 <7.0.0",
@@ -70,6 +71,7 @@
         "@types/jsdom": "^28.0.3",
         "@vitest/coverage-v8": "^4.1.7",
         "chalk": "^5.6.2",
+        "conventional-changelog-cli": "^5.0.0",
         "esbuild": "^0.28.0",
         "eslint": "^10.5.0",
         "jsdom": "^29.1.1",
