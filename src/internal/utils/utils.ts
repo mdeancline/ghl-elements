@@ -48,7 +48,7 @@ export function createApplyTrap<O extends object>(
 
     if (result instanceof Promise) {
         result.then(resolved => callback(prop as keyof O, resolved, args)).catch(() => {
-            //catch handlers here are only to prevent unhandled rejections
+            // catch handlers here are only to prevent unhandled rejections
         });
     } else {
         callback(prop as keyof O, result, args);
