@@ -1,43 +1,47 @@
 import { Mountable } from "./mountable";
 import { OrderBump, OrderBumpEventMap, OrderBumpSelectionDetails } from "../api/order-bump";
-import { assert } from "./utils/utils";
 import { OrderForm } from "../api/order-form";
+import { DynamicElementRef } from "./dom/dynamic-element-ref";
 
-// TODO reinforce order bump checkbox element in a lazy-updated WeakRef
 export class RealOrderBump extends OrderBump implements Mountable {
-    private readonly checkboxElement: HTMLInputElement;
+    private readonly checkboxRef: DynamicElementRef<HTMLInputElement>;
 
     public constructor(private readonly orderForm: OrderForm, private readonly element: HTMLElement) {
         super();
-        const checkboxElement = element.querySelector<HTMLInputElement>('input[type="checkbox"]');
-        assert(checkboxElement !== null, 'input[type="checkbox"] not found');
-        this.checkboxElement = checkboxElement;
+        this.checkboxRef = new DynamicElementRef('input[type="checkbox"]', element);
     }
 
     public mount(): void {
-        this.checkboxElement.addEventListener('change', () => {
-            const eventType: keyof OrderBumpEventMap = this.checkboxElement.checked ? 'select' : 'deselect';
-            const details: OrderBumpSelectionDetails = { orderForm: this.orderForm };
-            const event = new CustomEvent(eventType, { detail: details });
-            this.dispatchEvent(event);
-        });
+        const attachListener = (checkbox: HTMLInputElement) => {
+            checkbox.addEventListener('change', () => {
+                const eventType: keyof OrderBumpEventMap = checkbox.checked ? 'select' : 'deselect';
+                const details: OrderBumpSelectionDetails = { orderForm: this.orderForm };
+                this.dispatchEvent(new CustomEvent(eventType, { detail: details }));
+            });
+        };
+
+        attachListener(this.checkboxRef.deref());
+        this.checkboxRef.onReref(attachListener);
     }
 
-    // BUG doesn't actually get selected
     public select(): void {
-        this.checkboxElement.checked = true;
-        this.checkboxElement.dispatchEvent(new Event('change'));
+        if (!this.isSelected()) {
+            const checkbox = this.checkboxRef.deref();
+            checkbox.checked = true;
+            checkbox.dispatchEvent(new Event('change'));
+        }
     }
 
-    // BUG doesn't actually get deselected
     public deselect(): void {
-        this.checkboxElement.checked = false;
-        this.checkboxElement.dispatchEvent(new Event('change'));
+        if (this.isSelected()) {
+            const checkbox = this.checkboxRef.deref();
+            checkbox.checked = false;
+            checkbox.dispatchEvent(new Event('change'));
+        }
     }
 
-    // BUG always returns false
     public isSelected(): boolean {
-        return this.checkboxElement.checked;
+        return this.checkboxRef.deref().checked;
     }
 
     public get domElement(): HTMLElement {
