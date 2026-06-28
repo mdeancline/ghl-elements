@@ -1,6 +1,6 @@
 {
     "name": "@mdcline/ghl-elements",
-    "version": "1.0.0",
+    "version": "1.0.1",
     "description": "A framework for building custom element behavior on GoHighLevel pages",
     "author": "Matthew Cline",
     "type": "module",
