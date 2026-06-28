@@ -8,6 +8,7 @@ import { Mountable } from './mountable';
 import { HighLevelDocument } from '../api/high-level-document';
 import { Mounter } from './mounter';
 import { StripeRegistry } from './stripe/stripe-registry';
+import { DynamicElementRef } from './dom/dynamic-element-ref';
 
 export class RealOrderForm extends OrderForm implements Mountable {
     public static readonly SELECTOR: string = '.c-order';
@@ -18,8 +19,8 @@ export class RealOrderForm extends OrderForm implements Mountable {
     private static readonly COUPON_APPLIED_TEXT_SELECTOR: string = '.coupon-applied-text';
 
     private readonly couponBtnListeners = new WeakSet<HTMLButtonElement>();
-    private couponBtnRef: WeakRef<HTMLButtonElement> | null = null;
-    private couponInputRef: WeakRef<HTMLInputElement> | null = null;
+    private readonly couponBtnRef: DynamicElementRef<HTMLButtonElement>;
+    private readonly couponInputRef: DynamicElementRef<HTMLInputElement>;
     private appliedCoupon: string | null = null;
     private submittingCoupon = false;
 
@@ -35,6 +36,9 @@ export class RealOrderForm extends OrderForm implements Mountable {
         super();
         this.creationObserver = new ElementCreationObserver(element);
         this.updateObserver = new ElementUpdateObserver(element);
+        this.couponBtnRef = new DynamicElementRef(RealOrderForm.COUPON_BTN_SELECTOR, element);
+        this.couponBtnRef.onReref(btn => this.attachCouponButtonListeners(btn));
+        this.couponInputRef = new DynamicElementRef(RealOrderForm.COUPON_INPUT_SELECTOR, element);
     }
 
     public mount(): void {
@@ -50,11 +54,6 @@ export class RealOrderForm extends OrderForm implements Mountable {
 
         if (this.hasCouponsEnabled()) {
             this.mountCouponHandling();
-        } else {
-            this.creationObserver.watchSelector(RealOrderForm.COUPON_BTN_SELECTOR, (btn: HTMLButtonElement) => {
-                this.couponBtnRef = new WeakRef(this.attachCouponButtonListeners(btn));
-                this.mountCouponHandling();
-            });
         }
     }
 
@@ -66,26 +65,13 @@ export class RealOrderForm extends OrderForm implements Mountable {
 
         this.element.addEventListener('click', e => {
             const target = e.target;
-            if (!this.couponBtnRef?.deref() && target instanceof HTMLButtonElement && target.matches(RealOrderForm.COUPON_BTN_SELECTOR)) {
-                this.couponBtnRef = new WeakRef(this.attachCouponButtonListeners(target));
+            if (target instanceof HTMLButtonElement && target.matches(RealOrderForm.COUPON_BTN_SELECTOR)) {
+                this.couponBtnRef.refresh();
             }
         });
 
-        const existingBtn = this.couponButton;
-        if (existingBtn) this.attachCouponButtonListeners(existingBtn);
-
-        const existingInput = this.element.querySelector<HTMLInputElement>(RealOrderForm.COUPON_INPUT_SELECTOR);
-        if (existingInput) this.couponInputRef = new WeakRef(existingInput);
-
-        this.watchCouponButton();
         this.watchCouponInput();
         this.watchCouponAppliedText();
-    }
-
-    private watchCouponButton(): void {
-        this.creationObserver.watchSelector(RealOrderForm.COUPON_BTN_SELECTOR, (btn: HTMLButtonElement) => {
-            this.couponBtnRef = new WeakRef(this.attachCouponButtonListeners(btn));
-        });
     }
 
     private attachCouponButtonListeners(btn: HTMLButtonElement): HTMLButtonElement {
@@ -98,7 +84,7 @@ export class RealOrderForm extends OrderForm implements Mountable {
             if (this.appliedCoupon) {
                 this.dispatchCouponEvent('couponclear', this.appliedCoupon);
             } else {
-                const input = this.couponInputRef?.deref();
+                const input = this.couponInputRef.tryDeref();
                 const value = input?.value ?? '';
 
                 if (input?.classList.contains('text-box-error') && value.length > 0) {
@@ -115,10 +101,6 @@ export class RealOrderForm extends OrderForm implements Mountable {
     }
 
     private watchCouponInput(): void {
-        this.creationObserver.watchSelector(RealOrderForm.COUPON_INPUT_SELECTOR, (input: HTMLInputElement) => {
-            this.couponInputRef = new WeakRef(input);
-        });
-
         this.updateObserver.watchSelector(RealOrderForm.COUPON_INPUT_SELECTOR, (input: HTMLInputElement, info): void => {
             if (!this.submittingCoupon || !this.couponButton) return;
             if (info.type !== 'attributes' || info.attributeName !== 'class') return;
@@ -133,7 +115,7 @@ export class RealOrderForm extends OrderForm implements Mountable {
         this.creationObserver.watchSelector(RealOrderForm.COUPON_APPLIED_TEXT_SELECTOR, () => {
             if (!this.submittingCoupon) return;
 
-            const coupon = this.couponInputRef?.deref()?.value ?? '';
+            const coupon = this.couponInputRef.tryDeref()?.value ?? '';
             this.dispatchCouponEvent('couponsuccess', coupon);
             this.dispatchCouponEvent('couponprocessed', coupon);
         });
@@ -156,26 +138,17 @@ export class RealOrderForm extends OrderForm implements Mountable {
     }
 
     public get couponButton(): HTMLButtonElement | null {
-        const cached = this.couponBtnRef?.deref() ?? null;
-        if (cached) return cached;
-
-        const found = this.element.querySelector<HTMLButtonElement>(RealOrderForm.COUPON_BTN_SELECTOR);
-        if (found) this.couponBtnRef = new WeakRef(found);
-        return found;
+        return this.couponBtnRef.tryDeref();
     }
 
     public submitCoupon(code: string): boolean {
         if (this.submittingCoupon || !this.hasCouponsEnabled()) return false;
 
-        const couponInput = this.couponInputRef?.deref()
-            ?? this.element.querySelector<HTMLInputElement>(RealOrderForm.COUPON_INPUT_SELECTOR);
-
+        const couponInput = this.couponInputRef.tryDeref();
         const couponBtn = this.couponButton;
 
         if (!couponInput) return false;
 
-        this.couponInputRef = new WeakRef(couponInput);
-        this.couponBtnRef = new WeakRef(this.attachCouponButtonListeners(couponBtn));
         couponInput.value = code;
         couponInput.dispatchEvent(new Event('input', { bubbles: true }));
         couponBtn.dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true, view: window }));
