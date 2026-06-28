@@ -13,6 +13,8 @@ import { HighLevelElement } from "./high-level-element";
  * ```
  * @public
  */
+// TODO add order button getter
+// TODO add coupon input getter
 export abstract class OrderForm extends HighLevelElement<HTMLDivElement, OrderFormEventMap> {
     /**
      * Retrieves a mounted Stripe element by its type name.
