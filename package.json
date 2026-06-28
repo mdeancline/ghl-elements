@@ -37,7 +37,6 @@
     "scripts": {
         "lint": "eslint .",
         "lint:fix": "eslint . --fix",
-        "changelog": "conventional-changelog -p angular -i CHANGELOG.md -s",
         "clean": "node clean.mjs",
         "build:types": "tsc --project tsconfig.json",
         "build:js": "node build.mjs",
@@ -45,8 +44,8 @@
         "build:pack": "npm run build && npm pack",
         "rebuild": "npm run clean && npm run build",
         "prepublishOnly": "npm run build",
-        "ship:dry": "npm run build && npm publish --dry-run --access public",
-        "ship:prod": "npm run changelog && npm run build && npm publish --access public"
+        "ship:dry": "release-it --dry-run",
+        "ship:prod": "release-it"
     },
     "peerDependencies": {
         "@stripe/stripe-js": ">=6.0.0 <7.0.0",
@@ -67,6 +66,7 @@
     "devDependencies": {
         "@eslint/js": "^10.0.1",
         "@microsoft/api-extractor": "^7.58.9",
+        "@release-it/conventional-changelog": "^11.0.1",
         "@stripe/stripe-js": "^6.0.0",
         "@stylistic/eslint-plugin": "^5.10.0",
         "@types/jsdom": "^28.0.3",
@@ -76,6 +76,7 @@
         "esbuild": "^0.28.0",
         "eslint": "^10.5.0",
         "jsdom": "^29.1.1",
+        "release-it": "^20.2.1",
         "typescript": "^5.7.2",
         "typescript-eslint": "^8.61.1",
         "vitest": "^4.1.7"
