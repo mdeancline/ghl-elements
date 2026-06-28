@@ -6,7 +6,7 @@ export class DynamicElementRef<T extends Element> {
 
     public constructor(
         private readonly selector: string,
-        private readonly container: ParentNode = document.body
+        private readonly container: ParentNode
     ) {
         const element = container.querySelector<T>(selector);
 
