@@ -26,7 +26,7 @@ export class RealOrderForm extends OrderForm implements Mountable {
 
     private readonly creationObserver: ElementCreationObserver<HTMLElement>;
     private readonly updateObserver: ElementUpdateObserver<HTMLElement>;
-    private readonly currentOrderBumps = new Map<string, RealOrderBump>();
+    private readonly currentOrderBumps = new Map<string, OrderBump>();
 
     public constructor(
         private readonly hldocument: HighLevelDocument & Mounter,
