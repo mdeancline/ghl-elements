@@ -141,6 +141,7 @@ export class RealOrderForm extends OrderForm implements Mountable {
         return this.couponBtnRef.tryDeref();
     }
 
+    // BUG returns false when called after manual removal of valid coupon
     public submitCoupon(code: string): boolean {
         if (this.submittingCoupon || !this.hasCouponsEnabled()) return false;
 
