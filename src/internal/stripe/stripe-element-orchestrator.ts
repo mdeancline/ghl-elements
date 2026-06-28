@@ -73,7 +73,7 @@ export class StripeElementOrchestrator {
 
     private watchForRemoval(mountingElement: HTMLElement, orderForm: RealOrderForm): void {
         const observer = new MutationObserver(() => {
-            if (document.contains(mountingElement)) {
+            if (!document.contains(mountingElement)) {
                 this.stripeRegistry.invalidate(orderForm);
                 observer.disconnect();
             }

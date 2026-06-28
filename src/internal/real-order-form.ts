@@ -157,17 +157,14 @@ export class RealOrderForm extends OrderForm implements Mountable {
         return true;
     }
 
-    // BUG always returns null
     public getStripeElement<K extends StripeElementType>(name: K): StripeElement | null {
         return this.stripeRegistry.getElement(this, name);
     }
 
-    // BUG returned Promise is left hanging if called after StripeElements resolution
     public getStripeElements(): Promise<StripeElements> {
         return this.stripeRegistry.getElements(this);
     }
 
-    // BUG always returns false
     public hasStripeAvailable(): boolean {
         return this.stripeRegistry.hasElementsAvailable(this);
     }

@@ -28,7 +28,7 @@ export class StripeRegistry {
     }
 
     public invalidate(form: OrderForm): void {
-        this.handles.delete(form.domElement);
+        this.handles.get(form.domElement)?.invalidate();
     }
 
     public hasElementsAvailable(form: OrderForm): boolean {
