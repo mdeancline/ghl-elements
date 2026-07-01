@@ -45,7 +45,15 @@
         "rebuild": "npm run clean && npm run build",
         "prepublishOnly": "npm run build",
         "ship:dry": "release-it --dry-run",
-        "ship:prod": "release-it"
+        "ship:prod": "release-it",
+        "prepare": "npx simple-git-hooks"
+    },
+    "lint-staged": {
+        "*.ts": "eslint --fix"
+    },
+    "simple-git-hooks": {
+        "pre-commit": "npx lint-staged",
+        "commit-msg": "npx commitlint --edit $1"
     },
     "peerDependencies": {
         "@stripe/stripe-js": ">=6.0.0 <7.0.0",
@@ -64,6 +72,8 @@
         "weakref": "^0.2.4"
     },
     "devDependencies": {
+        "@commitlint/cli": "^21.2.0",
+        "@commitlint/config-conventional": "^21.2.0",
         "@eslint/js": "^10.0.1",
         "@microsoft/api-extractor": "^7.58.9",
         "@release-it/conventional-changelog": "^11.0.1",
@@ -76,7 +86,9 @@
         "esbuild": "^0.28.0",
         "eslint": "^10.5.0",
         "jsdom": "^29.1.1",
+        "lint-staged": "^17.0.8",
         "release-it": "^20.2.1",
+        "simple-git-hooks": "^2.13.1",
         "typescript": "^5.7.2",
         "typescript-eslint": "^8.61.1",
         "vitest": "^4.1.7"
