@@ -1,5 +1,5 @@
 import { IterableWeakMap } from 'weakref';
-import { isGoHighLevel } from './utils/utils';
+import { isGoHighLevel, assertPackageNotLoaded, declarePackageLoaded } from './utils/utils';
 import { AccordionFactory } from './accordion-factory';
 import { StandardAccordion } from './standard-accordion';
 import { ElementCreationObserver } from './dom/element-creation-observer';
@@ -27,6 +27,9 @@ class RealHighLevelDocument extends HighLevelDocument implements Mounter {
         if (!isGoHighLevel()) {
             throw new GHLElementsError('Only compatible with GoHighLevel websites');
         }
+
+        assertPackageNotLoaded();
+        declarePackageLoaded();
     }
 
     private constructor() {

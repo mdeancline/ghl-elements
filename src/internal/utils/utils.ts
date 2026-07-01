@@ -1,4 +1,7 @@
 import { GHLElementsError } from "../../api/ghl-elements-error";
+import { name } from '../../../package.json';
+
+const PACKAGE_KEY = Symbol.for(name);
 
 export function wrap<O extends object>(
     object: O,
@@ -105,4 +108,12 @@ export function assert(condition: unknown, message = 'no additional info provide
     if (!condition) {
         throw new GHLElementsError(`Assertion error: ${message}`);
     }
+}
+
+export function declarePackageLoaded(): void {
+    (window as any)[PACKAGE_KEY] = true;
+}
+
+export function assertPackageNotLoaded(): void {
+    assert(!(window as any)[PACKAGE_KEY], 'GHL Elements is already loaded on this window');
 }
