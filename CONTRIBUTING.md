@@ -49,7 +49,7 @@ This gives the maintainer a chance to weigh in before effort is spent on impleme
 
 ### Prerequisites
 
-- Node.js 18+
+- Node.js 20+
 - npm 11+
 - A GoHighLevel page to test against
 
@@ -60,6 +60,8 @@ git clone https://github.com/mdeancline/ghl-elements.git
 cd ghl-elements
 npm install
 ```
+
+Git hooks are set up automatically on install via `simple-git-hooks`. The pre-commit hook runs ESLint on staged files and the commit-msg hook enforces Conventional Commits via `commitlint`. Make sure your commit messages follow the format described in the Style Guides section or the commit will be rejected.
 
 ### Running the build
 
@@ -120,6 +122,8 @@ Common types:
 - `docs` for documentation only
 
 The version bump on release is determined automatically from commit types. `fix` triggers a patch bump, `feat` triggers a minor bump, and a breaking change triggers a major bump.
+
+Commit messages are validated automatically via `commitlint` on commit. Messages that do not follow the format will be rejected.
 
 ---
 
