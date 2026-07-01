@@ -14,7 +14,6 @@ import { Mounter } from './mounter';
 import { StripeRegistry as StripeRegistry } from './stripe/stripe-registry';
 import { GHLElementsError } from '../api/ghl-elements-error';
 
-// TODO add detection system for hldocument already existing in the same scope
 class RealHighLevelDocument extends HighLevelDocument implements Mounter {
     private static readonly INSTANCE: RealHighLevelDocument = new RealHighLevelDocument();
 
