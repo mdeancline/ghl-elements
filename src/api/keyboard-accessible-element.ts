@@ -32,9 +32,6 @@ export abstract class KeyboardAccessibleElement<T extends HTMLElement, M extends
      */
     abstract get keyboardAccessible(): boolean;
 
-    /**
-     * @since 1.1.0
-     */
     abstract set keyboardAccessible(value: boolean);
 }
 
