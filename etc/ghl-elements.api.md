@@ -9,7 +9,7 @@ import { StripeElements } from '@stripe/stripe-js';
 import { StripeElementType } from '@stripe/stripe-js';
 
 // @public
-export abstract class Accordion extends HighLevelElement<HTMLDivElement, AccordionEventMap> {
+export abstract class Accordion extends KeyboardAccessibleElement<HTMLDivElement, AccordionEventMap> {
     abstract close(): void;
     abstract isActive(): boolean;
     abstract open(): void;
@@ -17,10 +17,19 @@ export abstract class Accordion extends HighLevelElement<HTMLDivElement, Accordi
 }
 
 // @public
-export interface AccordionEventMap {
+export interface AccordionEventMap extends KeyboardEventMap {
     'close': CustomEvent<AccordionInteractionDetails>;
-    // Warning: (ae-forgotten-export) The symbol "AccordionInteractionDetails" needs to be exported by the entry point index.d.ts
     'open': CustomEvent<AccordionInteractionDetails>;
+}
+
+// @public
+export interface AccordionInteractionDetails {
+    cause?: UIEvent;
+}
+
+// @public
+export interface CouponUsageDetails {
+    coupon: string;
 }
 
 // @public
@@ -28,14 +37,22 @@ export class GHLElementsError extends Error {
     constructor(message: string);
 }
 
-// Warning: (ae-forgotten-export) The symbol "EventTargetBase" needs to be exported by the entry point index.d.ts
-//
 // @public
-export abstract class HighLevelDocument extends EventTargetBase<HighLevelDocumentEventMap> {
+export abstract class HighLevelDocument extends EventTarget {
+    // (undocumented)
+    addEventListener<K extends keyof HighLevelDocumentEventMap & string>(type: K, listener: (this: this, ev: HighLevelDocumentEventMap[K]) => any, options?: boolean | AddEventListenerOptions): void;
+    // (undocumented)
+    addEventListener<K extends keyof HighLevelDocumentEventMap & string>(type: K, listener: EventListenerOrEventListenerObject | null, options?: boolean | AddEventListenerOptions): void;
+    // (undocumented)
+    dispatchEvent<K extends keyof HighLevelDocumentEventMap & string>(event: HighLevelDocumentEventMap[K]): boolean;
     abstract getElementById<E extends HTMLElement, M extends Record<keyof M, M[keyof M]>, T extends HighLevelElement<E, M>>(id: string, constructor: abstract new (...args: any[]) => T): T | undefined;
     abstract getElementByNode<E extends HTMLElement, M extends Record<keyof M, M[keyof M]>, T extends HighLevelElement<E, M>>(node: E, constructor: abstract new (...args: any[]) => T): T | undefined;
     abstract getElementsByType<E extends HTMLElement, M extends Record<keyof M, M[keyof M]>, T extends HighLevelElement<E, M>>(constructor: abstract new (...args: any[]) => T): readonly T[];
     abstract getFirstElementByType<E extends HTMLElement, M extends Record<keyof M, M[keyof M]>, T extends HighLevelElement<E, M>>(constructor: abstract new (...args: any[]) => T): T | undefined;
+    // (undocumented)
+    removeEventListener<K extends keyof HighLevelDocumentEventMap & string>(type: K, listener: (this: this, ev: HighLevelDocumentEventMap[K]) => any, options?: boolean | EventListenerOptions): void;
+    // (undocumented)
+    removeEventListener<K extends keyof HighLevelDocumentEventMap & string>(type: K, listener: EventListenerOrEventListenerObject | null, options?: boolean | EventListenerOptions): void;
 }
 
 // @public
@@ -44,12 +61,38 @@ export interface HighLevelDocumentEventMap {
 }
 
 // @public
-export abstract class HighLevelElement<T extends HTMLElement, M extends Record<keyof M, M[keyof M]>> extends EventTargetBase<M> {
+export abstract class HighLevelElement<T extends HTMLElement, M extends Record<keyof M, M[keyof M]>> extends EventTarget {
+    // (undocumented)
+    addEventListener<K extends keyof M & string>(type: K, listener: (this: this, ev: M[K]) => any, options?: boolean | AddEventListenerOptions): void;
+    // (undocumented)
+    addEventListener<K extends keyof M & string>(type: K, listener: EventListenerOrEventListenerObject | null, options?: boolean | AddEventListenerOptions): void;
+    // (undocumented)
+    dispatchEvent<K extends keyof M & string>(event: M[K]): boolean;
     abstract get domElement(): T;
+    // (undocumented)
+    removeEventListener<K extends keyof M & string>(type: K, listener: (this: this, ev: M[K]) => any, options?: boolean | EventListenerOptions): void;
+    // (undocumented)
+    removeEventListener<K extends keyof M & string>(type: K, listener: EventListenerOrEventListenerObject | null, options?: boolean | EventListenerOptions): void;
 }
 
 // @public
 export const hldocument: HighLevelDocument;
+
+// @public
+export abstract class KeyboardAccessibleElement<T extends HTMLElement, M extends KeyboardEventMap> extends HighLevelElement<T, M> {
+    abstract get keyboardAccessible(): boolean;
+    abstract set keyboardAccessible(value: boolean);
+}
+
+// @public
+export interface KeyboardActionDetails {
+    cause: KeyboardEvent;
+}
+
+// @public
+export interface KeyboardEventMap {
+    'keyboardaction': CustomEvent<KeyboardActionDetails>;
+}
 
 // @public
 export abstract class OrderBump extends HighLevelElement<HTMLElement, OrderBumpEventMap> {
@@ -61,8 +104,12 @@ export abstract class OrderBump extends HighLevelElement<HTMLElement, OrderBumpE
 // @public
 export interface OrderBumpEventMap {
     'deselect': CustomEvent<OrderBumpSelectionDetails>;
-    // Warning: (ae-forgotten-export) The symbol "OrderBumpSelectionDetails" needs to be exported by the entry point index.d.ts
     'select': CustomEvent<OrderBumpSelectionDetails>;
+}
+
+// @public
+export interface OrderBumpSelectionDetails {
+    orderForm: OrderForm;
 }
 
 // @public
@@ -84,7 +131,6 @@ export interface OrderFormEventMap {
     'couponclear': CustomEvent<CouponUsageDetails>;
     'couponerror': CustomEvent<CouponUsageDetails>;
     'couponprocessed': CustomEvent<CouponUsageDetails>;
-    // Warning: (ae-forgotten-export) The symbol "CouponUsageDetails" needs to be exported by the entry point index.d.ts
     'couponsubmit': CustomEvent<CouponUsageDetails>;
     'couponsuccess': CustomEvent<CouponUsageDetails>;
 }
