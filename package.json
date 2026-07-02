@@ -46,7 +46,7 @@
         "prepublishOnly": "npm run build",
         "ship:dry": "release-it --dry-run",
         "ship:prod": "release-it",
-        "prepare": "npx simple-git-hooks"
+        "prepare": "node prepare.mjs"
     },
     "lint-staged": {
         "*.ts": "eslint --fix"
