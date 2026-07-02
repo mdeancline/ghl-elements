@@ -1,4 +1,4 @@
-import { HighLevelElement } from "./high-level-element";
+import { KeyboardAccessibleElement, KeyboardEventMap } from "./keyboard-accessible-element";
 
 /**
  * Represents a HighLevel accordion element, custom or provided by HighLevel, with open/close toggle behavior.
@@ -36,7 +36,7 @@ import { HighLevelElement } from "./high-level-element";
  * ```
  * @public
  */
-export abstract class Accordion extends HighLevelElement<HTMLDivElement, AccordionEventMap> {
+export abstract class Accordion extends KeyboardAccessibleElement<HTMLDivElement, AccordionEventMap> {
     /**
      * Opens the accordion. Has no effect if the accordion is already open.
      * 
@@ -80,7 +80,7 @@ export interface AccordionInteractionDetails {
  * Event map for accordion-specific events.
  * @public
  */
-export interface AccordionEventMap {
+export interface AccordionEventMap extends KeyboardEventMap {
     /** Fired when the accordion opens. */
     'open': CustomEvent<AccordionInteractionDetails>;
     /** Fired when the accordion closes. */

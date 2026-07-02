@@ -33,14 +33,26 @@ export class StandardAccordion extends AccordionBase {
         this.dispatchEvent(event);
     }
 
-    public override mount(): void {
-        this.element.setAttribute('tabindex', '0');
+    public override set keyboardAccessible(value: boolean) {
+        super.keyboardAccessible = value;
+        this.updateKeyboardNavigation();
+    }
 
-        if (this.trigger.tagName === 'BUTTON') {
-            this.trigger.setAttribute('tabindex', '-1');
+    private updateKeyboardNavigation(): void {
+        if (this.keyboardAccessible) {
+            this.element.setAttribute('tabindex', '0');
+        } else {
+            this.element.removeAttribute('tabindex');
         }
 
+        if (this.trigger.tagName === 'BUTTON' && this.keyboardAccessible) {
+            this.trigger.setAttribute('tabindex', '-1');
+        }
+    }
+
+    public override mount(): void {
         this.trigger.addEventListener('click', this.toggle.bind(this));
+        this.updateKeyboardNavigation();
         super.mount();
     }
 
