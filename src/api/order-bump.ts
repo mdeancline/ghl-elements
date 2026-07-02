@@ -39,12 +39,14 @@ import { OrderForm } from "./order-form";
  * }
  * ```
  * @public
+ * @since 1.0.0
  */
 export abstract class OrderBump extends HighLevelElement<HTMLElement, OrderBumpEventMap> {
     /**
      * Programmatically selects the order bump, as if the customer checked it.
      * 
      * Fires the `select` event on this element.
+     * @since 1.0.0
      */
     abstract select(): void;
 
@@ -52,11 +54,13 @@ export abstract class OrderBump extends HighLevelElement<HTMLElement, OrderBumpE
      * Programmatically deselects the order bump, as if the customer unchecked it.
      * 
      * Fires the `deselect` event on this element.
+     * @since 1.0.0
      */
     abstract deselect(): void;
 
     /**
      * Whether the order bump is currently selected.
+     * @since 1.0.0
      */
     abstract isSelected(): boolean;
 }
@@ -66,19 +70,30 @@ export abstract class OrderBump extends HighLevelElement<HTMLElement, OrderBumpE
  *
  * @see {@link OrderBumpEventMap}
  * @public
+ * @since 1.0.0
  */
 export interface OrderBumpSelectionDetails {
-    /** The order form that contains the order bump. */
+    /**
+     * The order form that contains the order bump.
+     * @since 1.0.0
+     */
     orderForm: OrderForm;
 }
 
 /**
  * Event map for order bump-specific events.
  * @public
+ * @since 1.0.0
  */
 export interface OrderBumpEventMap {
-    /** Fired when the order bump is selected. */
+    /**
+     * Fired when the order bump is selected.
+     * @since 1.0.0
+     */
     'select': CustomEvent<OrderBumpSelectionDetails>;
-    /** Fired when the order bump is deselected. */
+    /**
+     * Fired when the order bump is deselected.
+     * @since 1.0.0
+     */
     'deselect': CustomEvent<OrderBumpSelectionDetails>;
 }

@@ -12,6 +12,7 @@ import { HighLevelElement } from "./high-level-element";
  * form.submitCoupon('SAVE20');
  * ```
  * @public
+ * @since 1.0.0
  */
 // TODO add order button getter
 // TODO add coupon input getter
@@ -53,6 +54,7 @@ export abstract class OrderForm extends HighLevelElement<HTMLDivElement, OrderFo
      *     paymentElement?.collapse();
      * }
      * ```
+     * @since 1.0.0
      */
     abstract getStripeElement<K extends StripeElementType>(name: K): StripeElement | null;
 
@@ -89,6 +91,7 @@ export abstract class OrderForm extends HighLevelElement<HTMLDivElement, OrderFo
      *     });
      * });
      * ```
+     * @since 1.0.0
      */
     abstract getStripeElements(): Promise<StripeElements>;
 
@@ -110,6 +113,7 @@ export abstract class OrderForm extends HighLevelElement<HTMLDivElement, OrderFo
      *     form.getStripeElement('payment')?.collapse();
      * }
      * ```
+     * @since 1.0.0
      */
     abstract hasStripeAvailable(): boolean;
 
@@ -125,6 +129,7 @@ export abstract class OrderForm extends HighLevelElement<HTMLDivElement, OrderFo
      *     bump.select();
      * }
      * ```
+     * @since 1.0.0
      */
     abstract get orderBumps(): Iterable<OrderBump>;
 
@@ -143,6 +148,7 @@ export abstract class OrderForm extends HighLevelElement<HTMLDivElement, OrderFo
      * // Apply a coupon code to the order form
      * const success = form.submitCoupon('SAVE20');
      * ```
+     * @since 1.0.0
      */
     abstract submitCoupon(code: string): boolean;
 
@@ -158,6 +164,7 @@ export abstract class OrderForm extends HighLevelElement<HTMLDivElement, OrderFo
      *     form.couponButton.disabled = true;
      * }
      * ```
+     * @since 1.0.0
      */
     abstract get couponButton(): HTMLButtonElement | null;
 
@@ -177,6 +184,7 @@ export abstract class OrderForm extends HighLevelElement<HTMLDivElement, OrderFo
      *     form.couponButton.disabled = true;
      * }
      * ```
+     * @since 1.0.0
      */
     abstract hasCouponsEnabled(): this is OrderForm & { couponButton: HTMLButtonElement };
 
@@ -193,6 +201,7 @@ export abstract class OrderForm extends HighLevelElement<HTMLDivElement, OrderFo
      *     form.submitCoupon('SAVE20AGAIN');
      * }
      * ```
+     * @since 1.0.0
      */
     abstract hasCouponApplied(): boolean;
 }
@@ -202,25 +211,45 @@ export abstract class OrderForm extends HighLevelElement<HTMLDivElement, OrderFo
  *
  * @see {@link OrderFormEventMap}
  * @public
+ * @since 1.0.0
  */
 export interface CouponUsageDetails {
-    /** The coupon code that was submitted. */
+    /**
+     * The coupon code that was submitted.
+     * @since 1.0.0
+     */
     coupon: string;
 }
 
 /**
  * Event map for order form-specific events.
  * @public
+ * @since 1.0.0
  */
 export interface OrderFormEventMap {
-    /** Fired when a coupon code is submitted. */
+    /**
+     * Fired when a coupon code is submitted.
+     * @since 1.0.0
+     */
     'couponsubmit': CustomEvent<CouponUsageDetails>;
-    /** Fired after a coupon submission has concluded, regardless of whether it succeeded or failed. */
+    /**
+     * Fired after a coupon submission has concluded, regardless of whether it succeeded or failed.
+     * @since 1.0.0
+     */
     'couponprocessed': CustomEvent<CouponUsageDetails>;
-    /** Fired when a coupon code is successfully applied. */
+    /**
+     * Fired when a coupon code is successfully applied.
+     * @since 1.0.0
+     */
     'couponsuccess': CustomEvent<CouponUsageDetails>;
-    /** Fired when there's an error with applying a coupon code. */
+    /**
+     * Fired when there's an error with applying a coupon code.
+     * @since 1.0.0
+     */
     'couponerror': CustomEvent<CouponUsageDetails>;
-    /** Fired when an applied coupon code is cleared from the order form. */
+    /**
+     * Fired when an applied coupon code is cleared from the order form.
+     * @since 1.0.0
+     */
     'couponclear': CustomEvent<CouponUsageDetails>;
 }

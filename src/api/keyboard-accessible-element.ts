@@ -8,6 +8,7 @@ import { HighLevelElement } from "./high-level-element";
  * to `false` to disable it if the default behavior conflicts with your own keyboard handling.
  *
  * @public
+ * @since 1.1.0
  */
 export abstract class KeyboardAccessibleElement<T extends HTMLElement, M extends KeyboardEventMap> extends HighLevelElement<T, M> {
     /**
@@ -27,10 +28,27 @@ export abstract class KeyboardAccessibleElement<T extends HTMLElement, M extends
      *     faqChild.keyboardAccessible = false;
      * }
      * ```
+     * @since 1.1.0
      */
     abstract get keyboardAccessible(): boolean;
 
+    /**
+     * @since 1.1.0
+     */
     abstract set keyboardAccessible(value: boolean);
+}
+
+/**
+ * Event map for keyboard-specific events on a {@link KeyboardAccessibleElement}.
+ * @public
+ * @since 1.1.0
+ */
+export interface KeyboardEventMap {
+    /**
+     * Fired when a keyboard interaction is handled by this library.
+     * @since 1.1.0
+     */
+    'keyboardaction': CustomEvent<KeyboardActionDetails>;
 }
 
 /**
@@ -38,17 +56,12 @@ export abstract class KeyboardAccessibleElement<T extends HTMLElement, M extends
  *
  * @see {@link KeyboardEventMap}
  * @public
- */
-export interface KeyboardEventMap {
-    /** Fired when a keyboard interaction is handled by this library. */
-    'keyboardaction': CustomEvent<KeyboardActionDetails>;
-}
-
-/**
- * Event map for keyboard-specific events on a {@link KeyboardAccessibleElement}.
- * @public
+ * @since 1.1.0
  */
 export interface KeyboardActionDetails {
-    /** The original keyboard event that triggered the interaction. */
+    /**
+     * The original keyboard event that triggered the interaction.
+     * @since 1.1.0
+     */
     cause: KeyboardEvent;
 }

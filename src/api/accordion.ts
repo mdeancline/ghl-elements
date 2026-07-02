@@ -35,12 +35,14 @@ import { KeyboardAccessibleElement, KeyboardEventMap } from "./keyboard-accessib
  * accordions.forEach(a => a.close());
  * ```
  * @public
+ * @since 1.0.0
  */
 export abstract class Accordion extends KeyboardAccessibleElement<HTMLDivElement, AccordionEventMap> {
     /**
      * Opens the accordion. Has no effect if the accordion is already open.
      * 
      * Fires the `open` event on this element.
+     * @since 1.0.0
      */
     abstract open(): void;
 
@@ -49,6 +51,7 @@ export abstract class Accordion extends KeyboardAccessibleElement<HTMLDivElement
      * 
      * Has no effect if the accordion is already closed.
      * Fires the `close` event on this element.
+     * @since 1.0.0
      */
     abstract close(): void;
 
@@ -56,11 +59,13 @@ export abstract class Accordion extends KeyboardAccessibleElement<HTMLDivElement
      * Toggles the accordion between open and closed states.
      * 
      * Opens if currently closed, closes if currently open.
+     * @since 1.0.0
      */
     abstract toggle(): void;
 
     /**
      * Whether the accordion is currently open.
+     * @since 1.0.0
      */
     abstract isActive(): boolean;
 }
@@ -70,19 +75,30 @@ export abstract class Accordion extends KeyboardAccessibleElement<HTMLDivElement
  *
  * @see {@link AccordionEventMap}
  * @public
+ * @since 1.0.0
  */
 export interface AccordionInteractionDetails {
-    /** The UI event that triggered the interaction, if initiated by the user. Absent if triggered programmatically. */
+    /**
+     * The UI event that triggered the interaction, if initiated by the user. Absent if triggered programmatically.
+     * @since 1.0.0
+     */
     cause?: UIEvent;
 }
 
 /**
  * Event map for accordion-specific events.
  * @public
+ * @since 1.0.0
  */
 export interface AccordionEventMap extends KeyboardEventMap {
-    /** Fired when the accordion opens. */
+    /**
+     * Fired when the accordion opens.
+     * @since 1.0.0
+     */
     'open': CustomEvent<AccordionInteractionDetails>;
-    /** Fired when the accordion closes. */
+    /**
+     * Fired when the accordion closes.
+     * @since 1.0.0
+     */
     'close': CustomEvent<AccordionInteractionDetails>;
 }

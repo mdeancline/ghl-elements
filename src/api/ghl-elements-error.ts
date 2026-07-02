@@ -19,8 +19,13 @@
  * }
  * ```
  * @public
+ * @since 1.0.0
  */
 export class GHLElementsError extends Error {
+    /**
+     * @param message - The error message
+     * @since 1.0.0
+     */
     public constructor(message: string) {
         super(message);
         this.name = this.constructor.name;
