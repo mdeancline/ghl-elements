@@ -3,6 +3,9 @@ import { KeyboardAccessibleElement, KeyboardEventMap } from "./keyboard-accessib
 /**
  * Represents a HighLevel accordion element, custom or provided by HighLevel, with open/close toggle behavior.
  * 
+ * Accordions are not keyboard accessible by default in HighLevel. This library automatically adds keyboard support. 
+ * When an accordion is focused, pressing `Enter` or `Space` toggles it.
+ * 
  * Two accordion types are supported:
  * - **Custom accordions:** elements with the `.accordion` class, registered automatically by `hldocument`
  * - **FAQ accordions:** HighLevel FAQ child elements with the `.hl-faq-child` class, registered automatically by `hldocument`
