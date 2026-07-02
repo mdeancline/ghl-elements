@@ -1,4 +1,3 @@
-import { EventTargetBase } from "../internal/utils/event-target-base";
 import { HighLevelElement } from "./high-level-element";
 
 /**
@@ -17,7 +16,23 @@ import { HighLevelElement } from "./high-level-element";
  * ```
  * @public
  */
-export abstract class HighLevelDocument extends EventTargetBase<HighLevelDocumentEventMap> {
+export abstract class HighLevelDocument extends EventTarget {
+    public override addEventListener<K extends keyof HighLevelDocumentEventMap & string>(type: K, listener: (this: this, ev: HighLevelDocumentEventMap[K]) => any, options?: boolean | AddEventListenerOptions): void;
+    public override addEventListener<K extends keyof HighLevelDocumentEventMap & string>(type: K, listener: EventListenerOrEventListenerObject | null, options?: boolean | AddEventListenerOptions): void;
+    public override addEventListener<K extends keyof HighLevelDocumentEventMap & string>(type: K, listener: ((...args: any[]) => any) | EventListenerObject | null, options?: boolean | AddEventListenerOptions): void {
+        super.addEventListener(type, listener, options);
+    }
+
+    public override removeEventListener<K extends keyof HighLevelDocumentEventMap & string>(type: K, listener: (this: this, ev: HighLevelDocumentEventMap[K]) => any, options?: boolean | EventListenerOptions): void;
+    public override removeEventListener<K extends keyof HighLevelDocumentEventMap & string>(type: K, listener: EventListenerOrEventListenerObject | null, options?: boolean | EventListenerOptions): void;
+    public override removeEventListener<K extends keyof HighLevelDocumentEventMap & string>(type: K, listener: ((...args: any[]) => any) | EventListenerObject | null, options?: boolean | EventListenerOptions): void {
+        super.removeEventListener(type, listener, options);
+    }
+
+    public override dispatchEvent<K extends keyof HighLevelDocumentEventMap & string>(event: HighLevelDocumentEventMap[K]): boolean {
+        return super.dispatchEvent(event);
+    }
+
     /**
      * Retrieves a loaded {@link HighLevelElement} by its DOM element reference.
      *
