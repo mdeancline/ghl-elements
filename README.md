@@ -112,6 +112,73 @@ hldocument.addEventListener('elementloaded', event => {
 
 ---
 
+### `HighLevelElement`
+
+The base for all HighLevel DOM element wrappers (`OrderForm`, `OrderBump`, `Accordion`). Provides a typed event system and lifecycle management for GoHighLevel's available components, or if available, custom ones. You won't construct this directly, but its members are available on every element you retrieve from `hldocument`.
+
+#### Methods
+
+##### `addEventListener(type, listener, options?)`
+
+Adds a listener for one of this element's events. Typed to the element's own event map, so `type` and the listener's event parameter are checked against the events that element can actually fire.
+
+##### `removeEventListener(type, listener, options?)`
+
+Removes a previously added event listener. Same typed signature as `addEventListener`.
+
+##### `dispatchEvent(event): boolean`
+
+Dispatches an event on this element. Typed to the element's own event map.
+
+#### Properties
+
+| Property | Type | Description |
+|---|---|---|
+| `domElement` | `T` | The underlying DOM element this wrapper manages |
+
+```typescript
+const form = hldocument.getFirstElementByType(OrderForm);
+form?.domElement.scrollIntoView();
+```
+
+---
+
+### `KeyboardAccessibleElement`
+
+Extends `HighLevelElement` and is the base class for elements that support toggling the keyboard accessibility behavior this library adds on top of HighLevel's default markup. Currently, `Accordion` is the only built-in element that extends it.
+
+Keyboard accessibility is enabled by default. Set `keyboardAccessible` to `false` on an element if this library's default keyboard handling conflicts with your own.
+
+#### Properties
+
+| Property | Type | Description |
+|---|---|---|
+| `keyboardAccessible` | `boolean` | Whether this library's keyboard accessibility behavior is active for this element. Defaults to `true`. |
+
+```typescript
+// Disable keyboard accessibility on a specific accordion
+const faqChild = hldocument.getElementById('faq-sR-MbONj3oUV-child-2', Accordion);
+if (faqChild) {
+    faqChild.keyboardAccessible = false;
+}
+```
+
+#### Element Events
+
+| Event | Detail Type | Fired When |
+|---|---|---|
+| `keyboardaction` | `KeyboardActionDetails` | A keyboard interaction is handled by this library |
+
+#### `KeyboardActionDetails`
+
+The shape of `event.detail` for keyboard interaction events. Not a named export; TypeScript infers it automatically from `event.detail`. No import is needed to use it.
+
+| Property | Type | Description |
+|---|---|---|
+| `cause` | `KeyboardEvent` | The original keyboard event that triggered the interaction |
+
+---
+
 ### `OrderForm`
 
 Represents a HighLevel order form element. Provides access to Stripe Elements, order bumps, and coupon submission.
@@ -333,7 +400,9 @@ The shape of `event.detail` for selection events. Not a named export; TypeScript
 
 ### `Accordion`
 
-Represents a HighLevel accordion element, either a custom accordion (`.accordion`) or an FAQ child (`.hl-faq-child`).
+Represents a HighLevel accordion element, either a custom accordion (`.accordion`) or an FAQ child (`.hl-faq-child`). Extends `KeyboardAccessibleElement`.
+
+Accordions are not keyboard accessible by default in HighLevel. This library automatically adds keyboard support: when an accordion is focused, pressing `Enter` or `Space` toggles it. See [`KeyboardAccessibleElement`](#keyboardaccessibleelement) to disable this behavior.
 
 #### Retrieving Accordions
 
@@ -386,6 +455,7 @@ if (accordion?.isActive()) {
 |---|---|---|
 | `open` | `AccordionInteractionDetails` | The accordion opens |
 | `close` | `AccordionInteractionDetails` | The accordion closes |
+| `keyboardaction` | `KeyboardActionDetails` | A keyboard interaction is handled by this library (inherited from `KeyboardAccessibleElement`) |
 
 ```typescript
 accordion.addEventListener('open', event => {
