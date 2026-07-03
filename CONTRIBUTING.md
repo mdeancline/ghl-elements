@@ -63,6 +63,10 @@ npm install
 
 Git hooks are set up automatically on install via `simple-git-hooks`. The pre-commit hook runs ESLint on staged files and the commit-msg hook enforces Conventional Commits via `commitlint`. Make sure your commit messages follow the format described in the Style Guides section or the commit will be rejected.
 
+### Recommended Tools
+
+Not required, but if you use Visual Studio Code, the [Better Todo Tree](https://marketplace.visualstudio.com/items?itemName=FanaticPythoner.better-todo-tree) extension is worth installing. This project uses `TODO`, `FIXME`, `BUG`, and `XXX` comment markers to flag unfinished work, and these are enforced to fail the build at publish time (see `eslint.publish.config.mjs`). Better Todo Tree surfaces every marker across the codebase in a single sidebar view, making it much easier to catch one before it blocks a release.
+
 ### Running the build
 
 ```bash
