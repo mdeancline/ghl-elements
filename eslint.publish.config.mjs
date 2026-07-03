@@ -1,4 +1,3 @@
-// eslint.publish.config.mjs
 // @ts-check
 import { defineConfig } from 'eslint/config';
 import baseConfig from './eslint.config.mjs';
