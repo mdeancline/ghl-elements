@@ -1,5 +1,5 @@
 import { IterableWeakMap } from 'weakref';
-import { isGoHighLevel, assertPackageNotLoaded, declarePackageLoaded } from './utils/utils';
+import { assertGoHighLevel, assertPackageNotLoaded, declarePackageLoaded } from './utils/utils';
 import { AccordionFactory } from './accordion-factory';
 import { StandardAccordion } from './standard-accordion';
 import { ElementCreationObserver } from './dom/element-creation-observer';
@@ -12,7 +12,6 @@ import { HighLevelDocument } from '../api/high-level-document';
 import { StripeElementOrchestrator } from './stripe/stripe-element-orchestrator';
 import { Mounter } from './mounter';
 import { StripeRegistry as StripeRegistry } from './stripe/stripe-registry';
-import { GHLElementsError } from '../api/ghl-elements-error';
 
 // TODO optimize to O(1) lookup for elements by type
 class RealHighLevelDocument extends HighLevelDocument implements Mounter {
@@ -24,10 +23,7 @@ class RealHighLevelDocument extends HighLevelDocument implements Mounter {
     private readonly stripeOrchestrator: StripeElementOrchestrator = new StripeElementOrchestrator(this, this.stripeRegistry);
 
     static {
-        if (!isGoHighLevel()) {
-            throw new GHLElementsError('Only compatible with GoHighLevel websites');
-        }
-
+        assertGoHighLevel();
         assertPackageNotLoaded();
         declarePackageLoaded();
     }

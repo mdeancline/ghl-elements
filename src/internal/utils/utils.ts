@@ -92,16 +92,18 @@ export function callOnFullLoad(callback: () => void): void {
     window.addEventListener('load', callback, { once: true });
 }
 
-export function isGoHighLevel(): boolean {
+export function assertGoHighLevel(): void {
+    let assertion = false;
+
     for (const script of document.scripts) {
         const src = script.src;
 
         if (src.includes('leadconnectorhq.com') || src.includes('msgsndr.com')) {
-            return true;
+            assertion = true;
         }
     }
 
-    return false;
+    assert(assertion, 'Not being ran in a GoHighLevel window');
 }
 
 export function assert(condition: unknown, message = 'no additional info provided'): asserts condition {
