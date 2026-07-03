@@ -14,6 +14,7 @@ import { Mounter } from './mounter';
 import { StripeRegistry as StripeRegistry } from './stripe/stripe-registry';
 import { GHLElementsError } from '../api/ghl-elements-error';
 
+// TODO optimize to O(1) lookup for elements by type
 class RealHighLevelDocument extends HighLevelDocument implements Mounter {
     private static readonly INSTANCE: RealHighLevelDocument = new RealHighLevelDocument();
 
