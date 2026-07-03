@@ -133,7 +133,7 @@ export class RealOrderForm extends OrderForm implements Mountable {
                 if (!appliedText) {
                     this.couponJustCleared = true;
                     this.dispatchCouponEvent('couponclear', this.appliedCoupon);
-                    // HACK: setTimeout(0) defers the reset past the current click's full event
+                    // HACK setTimeout(0) defers the reset past the current click's full event
                     // propagation, since a microtask can run before the button's own listener
                     // fires. See if there's a cleaner way to sequence this once the coupon
                     // click-handling logic is reworked.
