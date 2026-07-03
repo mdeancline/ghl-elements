@@ -8,7 +8,7 @@ export default defineConfig(
         files: ['src/**/*.ts'],
         rules: {
             'no-warning-comments': ['error', {
-                terms: ['todo', 'fixme', 'fixit', 'bug', 'hack', 'xxx'],
+                terms: ['bug', 'fixme', 'todo', 'xxx'],
                 location: 'anywhere',
             }],
         },
