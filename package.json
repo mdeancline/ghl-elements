@@ -37,6 +37,7 @@
     "scripts": {
         "lint": "eslint .",
         "lint:fix": "eslint . --fix",
+        "lint:publish": "eslint -c eslint.publish.config.mjs src",
         "ensure:npm": "node ensure-npm.mjs",
         "clean": "node clean.mjs",
         "build:types": "tsc --project tsconfig.json",

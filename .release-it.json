@@ -6,7 +6,10 @@
         }
     },
     "hooks": {
-        "before:init": "npm run build"
+        "before:init": [
+            "npm run lint:publish",
+            "npm run build"
+        ]
     },
     "git": {
         "commitMessage": "chore: release ${version}",
