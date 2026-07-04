@@ -60,6 +60,7 @@ export class RealOrderBump extends OrderBump implements Mountable {
         return this.checkboxRef.current.tabIndex >= 0;
     }
 
+    // TODO ensure that this accounts for checkboxRef being refreshed and it not having the same tabindex as the old one
     public set keyboardAccessible(value: boolean) {
         if (value) {
             this.domElement.removeAttribute('tabindex');
