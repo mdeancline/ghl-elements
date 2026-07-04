@@ -1,6 +1,7 @@
 import { StripeElement, StripeElements, StripeElementType } from "@stripe/stripe-js";
 import { OrderBump } from "./order-bump";
 import { HighLevelElement } from "./high-level-element";
+import { HighLevelLiveRef } from "./high-level-live-ref";
 
 /**
  * Represents a HighLevel order form element.
@@ -14,7 +15,6 @@ import { HighLevelElement } from "./high-level-element";
  * @public
  * @since 1.0.0
  */
-// TODO add order button getter
 // TODO add paypal buttons accessibility
 export abstract class OrderForm extends HighLevelElement<HTMLDivElement, OrderFormEventMap> {
     /**
@@ -205,6 +205,14 @@ export abstract class OrderForm extends HighLevelElement<HTMLDivElement, OrderFo
      * @since 1.1.0
      */
     abstract get couponInputRef(): HighLevelLiveRef<HTMLInputElement>;
+
+    /**
+     * A live reference to the order button.
+     *
+     * @returns A live reference to the order button
+     * @since 1.1.0
+     */
+    abstract get orderButtonRef(): HighLevelLiveRef<HTMLButtonElement>;
 
     /**
      * Whether coupon codes are enabled for this order form.
