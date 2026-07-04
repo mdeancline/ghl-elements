@@ -45,7 +45,7 @@
         "build": "npm run clean && npm run build:js && npm run build:types",
         "build:pack": "npm run build && npm pack",
         "rebuild": "npm run clean && npm run build",
-        "prepublishOnly": "npm run build",
+        "prepublishOnly": "npm run lint:publish && npm run build",
         "ship:dry": "release-it --dry-run",
         "ship:prod": "release-it",
         "prepare": "node -e \"if (require('fs').existsSync('.git')) require('child_process').execSync('npx simple-git-hooks', {stdio: 'inherit'})\""
