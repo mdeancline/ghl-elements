@@ -1,5 +1,7 @@
 import { Accordion } from "../api/accordion";
+import { HighLevelLiveRef } from "../api/high-level-live-ref";
 import { Mountable } from "./mountable";
+import { emptyIterable } from "./utils/utils";
 
 export abstract class AccordionBase extends Accordion implements Mountable {
     private readonly keydownListener: (this: HTMLDivElement, ev: HTMLElementEventMap['keydown']) => any = this.handleKeydown.bind(this);
@@ -56,6 +58,10 @@ export abstract class AccordionBase extends Accordion implements Mountable {
 
     public get domElement(): HTMLDivElement {
         return this.element;
+    }
+
+    public get liveRefs(): Iterable<HighLevelLiveRef<HTMLElement>> {
+        return emptyIterable();
     }
 
     protected abstract openFromCause(cause?: UIEvent): void;

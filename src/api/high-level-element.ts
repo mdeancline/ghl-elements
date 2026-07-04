@@ -1,3 +1,5 @@
+import { HighLevelLiveRef } from "./high-level-live-ref";
+
 /**
  * The base for all HighLevel DOM element wrappers.
  * Provides a typed event system and lifecycle management for GoHighLevel's available 
@@ -40,4 +42,10 @@ export abstract class HighLevelElement<T extends HTMLElement, M extends Record<k
      * @since 1.0.0
      */
     abstract get domElement(): T;
+
+    /**
+     * The live DOM element references this wrapper manages.
+     * @since 1.1.0
+     */
+    abstract get liveRefs(): Iterable<HighLevelLiveRef<HTMLElement>>;
 }

@@ -6,4 +6,5 @@ export { KeyboardAccessibleElement, KeyboardEventMap, KeyboardActionDetails } fr
 export { Accordion, AccordionEventMap, AccordionInteractionDetails } from './api/accordion';
 export { OrderForm, OrderFormEventMap, CouponUsageDetails } from './api/order-form';
 export { OrderBump, OrderBumpEventMap, OrderBumpSelectionDetails } from './api/order-bump';
+export { HighLevelLiveRef, HighLevelLiveRefEventMap, HighLevelLiveRefDerefDetails, HighLevelLiveRefRefreshDetails } from './api/high-level-live-ref';
 // TODO create custom console logging formatter

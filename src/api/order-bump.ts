@@ -1,4 +1,5 @@
 import { HighLevelElement } from "./high-level-element";
+import { HighLevelLiveRef } from "./high-level-live-ref";
 import { OrderForm } from "./order-form";
 
 /**
@@ -63,6 +64,14 @@ export abstract class OrderBump extends HighLevelElement<HTMLElement, OrderBumpE
      * @since 1.0.0
      */
     abstract isSelected(): boolean;
+
+    /**
+     * A live reference to the order bump checkbox.
+     *
+     * @returns A live reference to the order bump checkbox
+     * @since 1.1.0
+     */
+    abstract get checkboxRef(): HighLevelLiveRef<HTMLInputElement>;
 }
 
 /**

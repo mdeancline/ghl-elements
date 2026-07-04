@@ -15,7 +15,6 @@ import { HighLevelElement } from "./high-level-element";
  * @since 1.0.0
  */
 // TODO add order button getter
-// TODO add coupon input getter
 // TODO add paypal buttons accessibility
 export abstract class OrderForm extends HighLevelElement<HTMLDivElement, OrderFormEventMap> {
     /**
@@ -154,6 +153,13 @@ export abstract class OrderForm extends HighLevelElement<HTMLDivElement, OrderFo
 
     /**
      * The coupon apply button, if coupon codes are enabled for this order form.
+     * 
+     * @deprecated Returns a direct element reference captured at access time, which
+     * silently goes stale if HighLevel re-renders this button, for example in response
+     * to user interaction or state changes. Use {@link OrderForm.couponButtonRef}
+     * instead, which handles this automatically by re-querying the DOM whenever the
+     * button becomes unavailable, sparing you from needing to detect and recover from
+     * staleness yourself.
      *
      * @returns The coupon apply button element, or `null` if coupon codes are not
      * enabled for this order form
@@ -167,6 +173,38 @@ export abstract class OrderForm extends HighLevelElement<HTMLDivElement, OrderFo
      * @since 1.0.0
      */
     abstract get couponButton(): HTMLButtonElement | null;
+
+    /**
+     * A live reference to the coupon apply button, if coupon codes are enabled
+     * for this order form.
+     *
+     * @returns A live reference to the coupon apply button
+     *
+     * @example
+     * ```typescript
+     * if (form.hasCouponsEnabled()) {
+     *     form.couponButtonRef.current.disabled = true;
+     * }
+     * ```
+     * @since 1.1.0
+     */
+    abstract get couponButtonRef(): HighLevelLiveRef<HTMLButtonElement>;
+
+    /**
+     * A live reference to the coupon input field, if coupon codes are enabled
+     * for this order form and a coupon has not been applied.
+     *
+     * @returns A live reference to the coupon input field
+     *
+     * @example
+     * ```typescript
+     * form.couponInputRef.addEventListener('refresh', e => {
+     *     e.detail.current.autocapitalize = 'characters';
+     * });
+     * ```
+     * @since 1.1.0
+     */
+    abstract get couponInputRef(): HighLevelLiveRef<HTMLInputElement>;
 
     /**
      * Whether coupon codes are enabled for this order form.

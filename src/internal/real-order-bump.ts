@@ -1,14 +1,16 @@
 import { Mountable } from "./mountable";
 import { OrderBump, OrderBumpEventMap, OrderBumpSelectionDetails } from "../api/order-bump";
 import { OrderForm } from "../api/order-form";
-import { DynamicElementRef } from "./dom/dynamic-element-ref";
+import { RealLiveRef } from "./dom/real-live-ref";
+import { HighLevelLiveRef } from "../api/high-level-live-ref";
+import { singleIterable } from "./utils/utils";
 
 export class RealOrderBump extends OrderBump implements Mountable {
-    private readonly checkboxRef: DynamicElementRef<HTMLInputElement>;
+    private readonly _checkboxRef: RealLiveRef<HTMLInputElement>;
 
     public constructor(private readonly orderForm: OrderForm, private readonly element: HTMLElement) {
         super();
-        this.checkboxRef = new DynamicElementRef('input[type="checkbox"]', element);
+        this._checkboxRef = new RealLiveRef('input[type="checkbox"]', element);
     }
 
     public mount(): void {
@@ -20,13 +22,12 @@ export class RealOrderBump extends OrderBump implements Mountable {
             });
         };
 
-        attachListener(this.checkboxRef.deref());
-        this.checkboxRef.onReref(attachListener);
+        this._checkboxRef.addEventListener('refresh', e => attachListener(e.detail.current));
     }
 
     public select(): void {
         if (!this.isSelected()) {
-            const checkbox = this.checkboxRef.deref();
+            const checkbox = this._checkboxRef.current;
             checkbox.checked = true;
             checkbox.dispatchEvent(new Event('change'));
         }
@@ -34,14 +35,22 @@ export class RealOrderBump extends OrderBump implements Mountable {
 
     public deselect(): void {
         if (this.isSelected()) {
-            const checkbox = this.checkboxRef.deref();
+            const checkbox = this._checkboxRef.current;
             checkbox.checked = false;
             checkbox.dispatchEvent(new Event('change'));
         }
     }
 
     public isSelected(): boolean {
-        return this.checkboxRef.deref().checked;
+        return this._checkboxRef.current.checked;
+    }
+
+    public get checkboxRef(): HighLevelLiveRef<HTMLInputElement> {
+        return this._checkboxRef;
+    }
+
+    public get liveRefs(): Iterable<HighLevelLiveRef<HTMLElement>> {
+        return singleIterable(this._checkboxRef);
     }
 
     public get domElement(): HTMLElement {

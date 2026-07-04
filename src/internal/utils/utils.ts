@@ -3,6 +3,18 @@ import { name } from '../../../package.json';
 
 const PACKAGE_KEY = Symbol.for(name);
 
+const EMPTY_ITERATOR: Iterator<never> = {
+    next(): IteratorResult<never> {
+        return { done: true, value: undefined };
+    }
+};
+
+const EMPTY_ITERABLE: Iterable<never> = {
+    [Symbol.iterator]() {
+        return EMPTY_ITERATOR;
+    }
+};
+
 export function wrap<O extends object>(
     object: O,
     getCallback: <K extends keyof O>(method: K, returnValue: unknown, args: unknown[]) => void,
@@ -118,4 +130,23 @@ export function declarePackageLoaded(): void {
 
 export function assertPackageNotLoaded(): void {
     assert(!(window as any)[PACKAGE_KEY], 'GHL Elements is already loaded on this window');
+}
+
+export function emptyIterable<T>(): Iterable<T> {
+    return EMPTY_ITERABLE as Iterable<T>;
+};
+
+export function singleIterable<T>(value: T): Iterable<T> {
+    return {
+        [Symbol.iterator]() {
+            let done = false;
+            return {
+                next(): IteratorResult<T> {
+                    if (done) return { done: true, value: undefined };
+                    done = true;
+                    return { done: false, value };
+                }
+            };
+        }
+    };
 }
