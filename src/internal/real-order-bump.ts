@@ -3,6 +3,7 @@ import { OrderBump, OrderBumpEventMap, OrderBumpSelectionDetails } from "../api/
 import { OrderForm } from "../api/order-form";
 import { RealLiveRef } from "./dom/real-live-ref";
 import { HighLevelLiveRef } from "../api/high-level-live-ref";
+import { KeyboardActionDetails } from "../api/keyboard-accessible-element";
 import { singleIterable } from "./utils/utils";
 
 export class RealOrderBump extends OrderBump implements Mountable {
@@ -19,6 +20,12 @@ export class RealOrderBump extends OrderBump implements Mountable {
                 const eventType: keyof OrderBumpEventMap = checkbox.checked ? 'select' : 'deselect';
                 const details: OrderBumpSelectionDetails = { orderForm: this.orderForm };
                 this.dispatchEvent(new CustomEvent(eventType, { detail: details }));
+            });
+
+            checkbox.addEventListener('keydown', (e: KeyboardEvent) => {
+                if (e.key !== ' ' && e.key !== 'Enter') return;
+                const details: KeyboardActionDetails = { cause: e };
+                this.dispatchEvent(new CustomEvent('keyboardaction', { detail: details }));
             });
         };
 
@@ -47,6 +54,18 @@ export class RealOrderBump extends OrderBump implements Mountable {
 
     public get checkboxRef(): HighLevelLiveRef<HTMLInputElement> {
         return this._checkboxRef;
+    }
+
+    public get keyboardAccessible(): boolean {
+        return this.checkboxRef.current.tabIndex >= 0;
+    }
+
+    public set keyboardAccessible(value: boolean) {
+        if (value) {
+            this.domElement.removeAttribute('tabindex');
+        } else {
+            this.domElement.setAttribute('tabindex', '-1');
+        }
     }
 
     public get liveRefs(): Iterable<HighLevelLiveRef<HTMLElement>> {

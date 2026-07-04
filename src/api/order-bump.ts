@@ -1,5 +1,5 @@
-import { HighLevelElement } from "./high-level-element";
 import { HighLevelLiveRef } from "./high-level-live-ref";
+import { KeyboardAccessibleElement, KeyboardEventMap } from "./keyboard-accessible-element";
 import { OrderForm } from "./order-form";
 
 /**
@@ -42,7 +42,7 @@ import { OrderForm } from "./order-form";
  * @public
  * @since 1.0.0
  */
-export abstract class OrderBump extends HighLevelElement<HTMLElement, OrderBumpEventMap> {
+export abstract class OrderBump extends KeyboardAccessibleElement<HTMLElement, OrderBumpEventMap> {
     /**
      * Programmatically selects the order bump, as if the customer checked it.
      * 
@@ -94,7 +94,7 @@ export interface OrderBumpSelectionDetails {
  * @public
  * @since 1.0.0
  */
-export interface OrderBumpEventMap {
+export interface OrderBumpEventMap extends KeyboardEventMap {
     /**
      * Fired when the order bump is selected.
      * @since 1.0.0
