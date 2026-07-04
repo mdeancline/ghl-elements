@@ -3,6 +3,7 @@ import { HighLevelLiveRef } from "../api/high-level-live-ref";
 import { Mountable } from "./mountable";
 import { emptyIterable } from "./utils/utils";
 
+// BUG RangeError for maximum call stack size exceeded is thrown upon manual and programmatic open/close/toggle
 export abstract class AccordionBase extends Accordion implements Mountable {
     private readonly keydownListener: (this: HTMLDivElement, ev: HTMLElementEventMap['keydown']) => any = this.handleKeydown.bind(this);
     private _keyboardAccessible = true;
